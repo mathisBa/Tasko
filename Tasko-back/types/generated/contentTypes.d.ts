@@ -389,6 +389,7 @@ export interface ApiFoyerFoyer extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     foyerId: Schema.Attribute.UID;
     foyerName: Schema.Attribute.String;
+    foyerOwner: Schema.Attribute.Relation<'oneToOne', 'api::member.member'>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::foyer.foyer'> &
       Schema.Attribute.Private;
@@ -433,6 +434,38 @@ export interface ApiMemberMember extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiRewardReward extends Struct.CollectionTypeSchema {
+  collectionName: 'rewards';
+  info: {
+    displayName: 'Reward';
+    pluralName: 'rewards';
+    singularName: 'reward';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::reward.reward'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    rewardClaimer: Schema.Attribute.Relation<'oneToOne', 'api::member.member'>;
+    rewardDate: Schema.Attribute.DateTime;
+    rewardId: Schema.Attribute.UID;
+    rewardName: Schema.Attribute.Enumeration<['notif', 'miaou', 'prout']>;
+    rewardTarget: Schema.Attribute.Relation<'oneToOne', 'api::member.member'>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiTaskTask extends Struct.CollectionTypeSchema {
   collectionName: 'tasks';
   info: {
@@ -451,6 +484,17 @@ export interface ApiTaskTask extends Struct.CollectionTypeSchema {
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::task.task'> &
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
+    taskCategory: Schema.Attribute.Enumeration<
+      [
+        'Cleaning',
+        'Tidying',
+        'Laundry',
+        'Cooking',
+        'Shopping',
+        'Housekeeping',
+        'Gardening',
+      ]
+    >;
     taskCreator: Schema.Attribute.Relation<'oneToOne', 'api::member.member'>;
     taskDate: Schema.Attribute.DateTime;
     taskDifficulty: Schema.Attribute.Enumeration<['easy', 'medium', 'complex']>;
@@ -977,6 +1021,7 @@ declare module '@strapi/strapi' {
       'admin::user': AdminUser;
       'api::foyer.foyer': ApiFoyerFoyer;
       'api::member.member': ApiMemberMember;
+      'api::reward.reward': ApiRewardReward;
       'api::task.task': ApiTaskTask;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;

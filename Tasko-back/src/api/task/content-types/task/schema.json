@@ -46,6 +46,18 @@
         "medium",
         "complex"
       ]
+    },
+    "taskCategory": {
+      "type": "enumeration",
+      "enum": [
+        "Cleaning",
+        "Tidying",
+        "Laundry",
+        "Cooking",
+        "Shopping",
+        "Housekeeping",
+        "Gardening"
+      ]
     }
   }
 }
