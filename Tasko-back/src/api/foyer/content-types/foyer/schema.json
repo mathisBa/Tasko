@@ -1,0 +1,21 @@
+{
+  "kind": "collectionType",
+  "collectionName": "foyers",
+  "info": {
+    "singularName": "foyer",
+    "pluralName": "foyers",
+    "displayName": "Foyer"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "foyerId": {
+      "type": "uid"
+    },
+    "foyerName": {
+      "type": "string"
+    }
+  }
+}
