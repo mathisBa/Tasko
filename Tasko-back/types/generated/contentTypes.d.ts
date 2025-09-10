@@ -453,6 +453,7 @@ export interface ApiTaskTask extends Struct.CollectionTypeSchema {
     publishedAt: Schema.Attribute.DateTime;
     taskCreator: Schema.Attribute.Relation<'oneToOne', 'api::member.member'>;
     taskDate: Schema.Attribute.DateTime;
+    taskDifficulty: Schema.Attribute.Enumeration<['easy', 'medium', 'complex']>;
     taskId: Schema.Attribute.UID;
     taskMember: Schema.Attribute.Relation<'oneToOne', 'api::member.member'>;
     taskName: Schema.Attribute.String;

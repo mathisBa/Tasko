@@ -38,6 +38,14 @@
       "type": "relation",
       "relation": "oneToOne",
       "target": "api::member.member"
+    },
+    "taskDifficulty": {
+      "type": "enumeration",
+      "enum": [
+        "easy",
+        "medium",
+        "complex"
+      ]
     }
   }
 }
