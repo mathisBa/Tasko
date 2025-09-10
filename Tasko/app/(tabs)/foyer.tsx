@@ -1,11 +1,12 @@
+
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { StyleSheet } from 'react-native';
 
-export default function IndexScreen() {
+export default function HomeScreen() {
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="title">Accueil</ThemedText>
+      <ThemedText type="title">Foyer</ThemedText>
     </ThemedView>
   );
 }
