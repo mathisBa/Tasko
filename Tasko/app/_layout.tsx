@@ -21,6 +21,16 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="addTask"
+          options={{
+            title: 'Ajouter une tâche',
+            headerStyle: {
+              backgroundColor: '#1B1611',
+            },
+            headerTintColor: 'white',
+          }}
+        />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />
