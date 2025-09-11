@@ -10,6 +10,8 @@ import {
   StyleSheet,
 } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { useTheme } from "react-native-paper";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 type Member = {
   memberId: string;
@@ -48,82 +50,153 @@ const user: Member = {
   memberPoints: 30,
 };
 
-const renderItem: ListRenderItem<Member> = ({ item, index }) => (
-  <View style={styles.rowMember}>
-    <View style={styles.rowProfile}>
-      <Text>{index + 1}</Text>
+export default function Foyer() {
+  const theme = useTheme();
+  const fontBody = theme.fonts.bodyMedium.fontFamily;
+  const fontButton = theme.fonts.labelMedium.fontFamily;
+  const fontTitle = theme.fonts.titleMedium.fontFamily;
 
-      <Image
-        style={styles.avatar}
-        source={{
-          uri: `https://ui-avatars.com/api/?name=${encodeURIComponent(
-            item.memberUsername || "Membre"
-          )}&background=ff9800&color=ffffff`,
-        }}
-      />
+  const cleanHex = (color: string) => color.replace("#", "").substring(0, 6);
 
-      <View>
-        <Text>
-          {item.memberUsername}{" "}
-          {item.memberId === user.memberId ? "(Vous)" : ""}
-        </Text>
+  const renderItem: ListRenderItem<Member> = ({ item, index }) => (
+    <View style={[styles.rowMember, { backgroundColor: theme.colors.surface }]}>
+      <View style={styles.rowProfile}>
         <Text
-          style={{
-            color: item.memberId === foyerOwnerID ? "orange" : "black",
-          }}
+          style={[
+            styles.number,
+            {
+              color: theme.colors.onSurface,
+              fontFamily: fontBody,
+            },
+          ]}
         >
-          {item.memberId === foyerOwnerID ? "Propriétaire" : "Membre"}
+          {index + 1}
+        </Text>
+
+        <Image
+          style={styles.avatar}
+          source={{
+            uri: `https://ui-avatars.com/api/?name=${encodeURIComponent(
+              item.memberUsername || "Membre"
+            )}&background=${cleanHex(theme.colors.primary)}&color=ffffff`,
+          }}
+        />
+
+        <View>
+          <Text
+            style={{
+              color: theme.colors.onSurface,
+              fontFamily: fontButton,
+              fontSize: 16,
+            }}
+          >
+            {item.memberUsername}{" "}
+            {item.memberId === user.memberId ? "(Vous)" : ""}
+          </Text>
+          <Text
+            style={{
+              color: theme.colors.onSurface,
+              fontFamily: fontBody,
+            }}
+          >
+            {item.memberId === foyerOwnerID ? "Propriétaire" : "Membre"}
+          </Text>
+        </View>
+      </View>
+      <TouchableOpacity>
+        <Ionicons size={22} name="trash-outline" color={theme.colors.primary} />
+      </TouchableOpacity>
+    </View>
+  );
+
+  return (
+    <View
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
+      <View style={styles.header}>
+        <Text
+          style={[
+            styles.title,
+            {
+              color: theme.colors.onBackground,
+              fontFamily: fontTitle,
+            },
+          ]}
+        >
+          Foyer
         </Text>
       </View>
-    </View>
-    <TouchableOpacity>
-      <MaterialCommunityIcons
-        name="trash-can-outline"
-        size={24}
-        color="black"
-      />
-    </TouchableOpacity>
-  </View>
-);
 
-export default function Foyer() {
-  return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Foyer</Text>
+      <View style={styles.headerList}>
+        <Text
+          style={{
+            color: theme.colors.onBackground,
+            fontFamily: fontTitle,
+            fontSize: 14,
+          }}
+        >
+          Membres
+        </Text>
+      </View>
+
       <FlatList<Member>
         data={data}
         keyExtractor={(item) => item.memberId}
         renderItem={renderItem}
+        ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
       />
-      <TouchableOpacity style={styles.bottomButton}>
-        <Text>Add</Text>
-        <MaterialCommunityIcons
-          name="plus-circle-multiple-outline"
-          size={24}
-          color="black"
+
+      <TouchableOpacity
+        style={[styles.bottomButton, { backgroundColor: theme.colors.primary }]}
+      >
+        <Text
+          style={{
+            color: theme.colors.onBackground,
+            fontFamily: fontButton,
+          }}
+        >
+          Add
+        </Text>
+        <Ionicons
+          size={22}
+          name="add-circle-outline"
+          color={theme.colors.onBackground}
         />
       </TouchableOpacity>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "white",
+    gap: 10,
+    flex: 1,
+    padding: 10,
+  },
+  header: {
+    display: "flex",
+    justifyContent: "center",
+    paddingTop: 10,
+    paddingBottom: 10,
+  },
+  headerList: {
+    display: "flex",
+    justifyContent: "flex-start",
+    textAlign: "left",
+    width: "100%",
+    paddingTop: 10,
+    paddingBottom: 10,
   },
   title: {
-    color: "black",
-    fontSize: 22,
-    fontWeight: "700",
-    marginBottom: 8,
+    fontSize: 20,
   },
   avatar: {
-    width: 44,
+    width: 36,
     aspectRatio: 1 / 1,
-    borderRadius: 22,
+    borderRadius: 5,
   },
   rowMember: {
     display: "flex",
@@ -133,27 +206,27 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
     paddingVertical: 10,
+    borderRadius: 5,
   },
   rowProfile: {
     display: "flex",
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    gap: 20,
+    gap: 10,
+  },
+  number: {
+    fontSize: 16,
+    marginRight: 12,
   },
   bottomButton: {
-    position: "absolute",
-    bottom: 100,
-    backgroundColor: "orange",
-    width: "90%",
-    left: "5%",
-    borderRadius: 20,
-    opacity: 0.9,
     display: "flex",
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
+    gap: 5,
+    width: "100%",
     padding: 10,
-    gap: 15,
+    borderRadius: 5,
   },
 });

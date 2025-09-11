@@ -18,7 +18,13 @@ export default function TabLayout() {
         tabBarActiveTintColor: theme.colors.primary,
         tabBarInactiveTintColor: theme.colors.onSurfaceVariant,
         tabBarStyle: {
-          backgroundColor: theme.colors.surface,
+          backgroundColor: theme.colors.background,
+          borderTopWidth: 0,
+          shadowColor: "white",
+          shadowOffset: { width: 0, height: -6 },
+          shadowOpacity: 0.6,
+          shadowRadius: 3,
+          elevation: 15,
           ...Platform.select({ ios: { position: "absolute" }, default: {} }),
         },
         tabBarLabelStyle: {

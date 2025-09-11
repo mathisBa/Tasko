@@ -22,8 +22,9 @@ const customLightTheme = {
     primary: "#fc713aff",
     secondary: "#ffb36cff",
     background: "#F9F9F9",
+    backgroundLight: "#F9F9F9",
     surface: "#FFFFFF",
-    text: "#272727ff",
+    onBackground: "#272727ff",
     placeholder: "#999999",
   },
   fonts: {
@@ -61,9 +62,9 @@ const customDarkTheme = {
     ...MD3DarkTheme.colors,
     primary: "#fc713aff",
     secondary: "#ffb36cff",
-    background: "#1f0b03ff",
-    surface: "#1f0b03ff",
-    text: "#FFFFFF",
+    background: "#221814ff",
+    surface: "#312622ff",
+    onBackground: "#FFFFFF",
     placeholder: "#AAAAAA",
   },
   fonts: {
