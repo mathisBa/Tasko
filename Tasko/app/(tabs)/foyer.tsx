@@ -9,6 +9,7 @@ import {
   SafeAreaView,
   StyleSheet,
 } from "react-native";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 type Member = {
   memberId: string;
@@ -39,6 +40,13 @@ const members: Member[] = [
 ];
 
 const data: Member[] = [...members].sort((a, b) => b.memberXP - a.memberXP);
+const foyerOwnerID = "memberId125";
+const user: Member = {
+  memberId: "memberId124",
+  memberUsername: "Benoit saint denis",
+  memberXP: 720,
+  memberPoints: 30,
+};
 
 const renderItem: ListRenderItem<Member> = ({ item, index }) => (
   <View style={styles.rowMember}>
@@ -50,19 +58,30 @@ const renderItem: ListRenderItem<Member> = ({ item, index }) => (
         source={{
           uri: `https://ui-avatars.com/api/?name=${encodeURIComponent(
             item.memberUsername || "Membre"
-          )}`,
+          )}&background=ff9800&color=ffffff`,
         }}
       />
 
       <View>
-        <Text>{item.memberUsername}</Text>
         <Text>
-          XP {item.memberXP} · Points {item.memberPoints}
+          {item.memberUsername}{" "}
+          {item.memberId === user.memberId ? "(Vous)" : ""}
+        </Text>
+        <Text
+          style={{
+            color: item.memberId === foyerOwnerID ? "orange" : "black",
+          }}
+        >
+          {item.memberId === foyerOwnerID ? "Propriétaire" : "Membre"}
         </Text>
       </View>
     </View>
     <TouchableOpacity>
-      <Text>⋮</Text>
+      <MaterialCommunityIcons
+        name="trash-can-outline"
+        size={24}
+        color="black"
+      />
     </TouchableOpacity>
   </View>
 );
@@ -76,6 +95,14 @@ export default function Foyer() {
         keyExtractor={(item) => item.memberId}
         renderItem={renderItem}
       />
+      <TouchableOpacity style={styles.bottomButton}>
+        <Text>Add</Text>
+        <MaterialCommunityIcons
+          name="plus-circle-multiple-outline"
+          size={24}
+          color="black"
+        />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -113,5 +140,20 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     gap: 20,
+  },
+  bottomButton: {
+    position: "absolute",
+    bottom: 100,
+    backgroundColor: "orange",
+    width: "90%",
+    left: "5%",
+    borderRadius: 20,
+    opacity: 0.9,
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 10,
+    gap: 15,
   },
 });
