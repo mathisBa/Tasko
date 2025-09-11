@@ -24,6 +24,7 @@ export default function AddTaskScreen() {
   const [pickerMode, setPickerMode] = useState<"date" | "time">("date");
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
   const handleAddTask = async () => {
     if (!taskName.trim() || !taskCategory.trim()) {
@@ -40,18 +41,15 @@ export default function AddTaskScreen() {
         taskStatus: "todo",
       };
       console.log(data);
-      const response = await fetch(
-        "https://36e2460ec91c.ngrok-free.app/api/tasks",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            data: data,
-          }),
-        }
-      );
+      const response = await fetch(`${apiUrl}/api/tasks`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          data: data,
+        }),
+      });
 
       if (response.ok) {
         router.back();
