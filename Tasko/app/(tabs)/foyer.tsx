@@ -41,25 +41,26 @@ const members: Member[] = [
 const data: Member[] = [...members].sort((a, b) => b.memberXP - a.memberXP);
 
 const renderItem: ListRenderItem<Member> = ({ item, index }) => (
-  <View>
-    <Text>{index + 1}</Text>
+  <View style={styles.rowMember}>
+    <View style={styles.rowProfile}>
+      <Text>{index + 1}</Text>
 
-    <Image
-      style={styles.avatar}
-      source={{
-        uri: `https://ui-avatars.com/api/?name=${encodeURIComponent(
-          item.memberUsername || "Membre"
-        )}`,
-      }}
-    />
+      <Image
+        style={styles.avatar}
+        source={{
+          uri: `https://ui-avatars.com/api/?name=${encodeURIComponent(
+            item.memberUsername || "Membre"
+          )}`,
+        }}
+      />
 
-    <View>
-      <Text>{item.memberUsername}</Text>
-      <Text>
-        XP {item.memberXP} · Points {item.memberPoints}
-      </Text>
+      <View>
+        <Text>{item.memberUsername}</Text>
+        <Text>
+          XP {item.memberXP} · Points {item.memberPoints}
+        </Text>
+      </View>
     </View>
-
     <TouchableOpacity>
       <Text>⋮</Text>
     </TouchableOpacity>
@@ -87,7 +88,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
   },
   title: {
-    color: "#fff",
+    color: "black",
     fontSize: 22,
     fontWeight: "700",
     marginBottom: 8,
@@ -96,5 +97,21 @@ const styles = StyleSheet.create({
     width: 44,
     aspectRatio: 1 / 1,
     borderRadius: 22,
+  },
+  rowMember: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  rowProfile: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 20,
   },
 });
