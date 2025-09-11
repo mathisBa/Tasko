@@ -15,24 +15,26 @@ const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 export default function TasksScreen() {
   const [tasks, setTasks] = React.useState<any[]>([]);
   const insets = useSafeAreaInsets();
-  useFocusEffect(() => {
-    fetch(`${apiUrl}/api/tasks`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        const filteredTasks = data.data.filter(
-          (task: any) => task.taskStatus !== "done"
-        );
-        setTasks(filteredTasks);
+  useFocusEffect(
+    React.useCallback(() => {
+      fetch(`${apiUrl}/api/tasks`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
       })
-      .catch((error) => {
-        console.error("Error fetching tasks:", error);
-      });
-  });
+        .then((response) => response.json())
+        .then((data) => {
+          const filteredTasks = data.data.filter(
+            (task: any) => task.taskStatus !== "done"
+          );
+          setTasks(filteredTasks);
+        })
+        .catch((error) => {
+          console.error("Error fetching tasks:", error);
+        });
+    }, [])
+  );
 
   const setChecked = async (checkedItem: any) => {
     checkedItem.taskStatus = "done";
