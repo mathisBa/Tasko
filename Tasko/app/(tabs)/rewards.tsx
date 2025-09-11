@@ -5,9 +5,9 @@ import {
   FlatList,
   ListRenderItem,
   StyleSheet,
+  TouchableOpacity,
 } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { ScrollView } from "react-native-gesture-handler";
 
 type Member = {
   memberId: string;
@@ -49,7 +49,7 @@ const user: Member = {
   memberId: "memberId124",
   memberUsername: "Benoit saint denis",
   memberXP: 720,
-  memberPoints: 30,
+  memberPoints: 200,
 };
 
 const rewards: Reward[] = [
@@ -91,19 +91,45 @@ const rewards: Reward[] = [
   },
 ];
 
-const renderItem: ListRenderItem<Reward> = ({ item, index }) => (
-  <View>
-    <View>
-      <Image
-        style={styles.rewardPicture}
-        source={{
-          uri: item.rewardImage,
-        }}
-      />
-      <Text>{index}</Text>
+function handleClaim(item: Reward) {
+  // logique de réclamation
+}
+
+const renderItem: ListRenderItem<Reward> = ({ item }) => {
+  const canClaim = user.memberPoints >= item.rewardCost;
+  const missing = Math.max(0, item.rewardCost - user.memberPoints);
+
+  return (
+    <View style={styles.itemRow}>
+      <View style={styles.formRow}>
+        <View style={styles.costRow}>
+          <MaterialCommunityIcons
+            name="trophy-award"
+            size={18}
+            color="orange"
+          />
+          <Text style={styles.pointsCount}>{item.rewardCost} points</Text>
+        </View>
+
+        <Text style={styles.itemTitle}>{item.rewardName}</Text>
+        <Text style={styles.itemSub}>{item.rewardDescritpion}</Text>
+
+        <TouchableOpacity
+          disabled={!canClaim}
+          onPress={() => canClaim && handleClaim(item)}
+        >
+          <Text
+            style={canClaim ? styles.claimButton : styles.claimButtonDisabled}
+          >
+            {canClaim ? "Récupérer" : `Il vous manque ${missing} points`}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <Image style={styles.rewardPicture} source={{ uri: item.rewardImage }} />
     </View>
-  </View>
-);
+  );
+};
 
 export default function Recompenses() {
   return (
@@ -123,6 +149,7 @@ export default function Recompenses() {
         <Text style={styles.pointsCount}>{user.memberPoints} points</Text>
       </View>
       <FlatList<Reward>
+        style={styles.rewardsList}
         data={rewards}
         keyExtractor={(item) => item.rewardID}
         renderItem={renderItem}
@@ -154,7 +181,53 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   rewardPicture: {
-    width: 100,
+    width: "30%",
     aspectRatio: 2 / 1,
+    borderRadius: 8,
+    resizeMode: "cover",
+  },
+  itemRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+    width: "100%",
+    overflow: "hidden",
+    flexWrap: "wrap",
+    marginBottom: 30,
+    backgroundColor: "grey",
+    padding: 10,
+    borderRadius: 10,
+  },
+  formRow: {
+    width: "60%",
+  },
+  itemTitle: {
+    fontWeight: "700",
+    marginBottom: 2,
+    color: "black",
+  },
+  itemSub: {
+    color: "black",
+    marginBottom: 6,
+  },
+  costRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  claimButton: {
+    backgroundColor: "orange",
+    padding: 10,
+    width: "auto",
+    borderRadius: 5,
+  },
+  claimButtonDisabled: {
+    backgroundColor: "pink",
+    padding: 10,
+    width: "auto",
+    borderRadius: 5,
+  },
+  rewardsList: {
+    paddingVertical: 20,
   },
 });
