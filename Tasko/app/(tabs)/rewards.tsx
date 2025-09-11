@@ -1,6 +1,5 @@
 import {
   View,
-  Text,
   Image,
   FlatList,
   ListRenderItem,
@@ -10,6 +9,10 @@ import {
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { Picker } from "@react-native-picker/picker";
 import React, { useState, useCallback } from "react";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import { Colors } from "@/constants/Colors";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type Member = {
   memberId: string;
@@ -95,6 +98,7 @@ const rewards: Reward[] = [
 
 export default function Recompenses() {
   const [targets, setTargets] = useState<Record<string, string>>({});
+  const insets = useSafeAreaInsets();
 
   const setTarget = useCallback((rewardID: string, memberId: string) => {
     setTargets((p) => ({ ...p, [rewardID]: memberId }));
@@ -116,25 +120,40 @@ export default function Recompenses() {
     const canClaim = enough && !!targetId;
 
     return (
-      <View style={styles.itemRow}>
+      <ThemedView
+        style={styles.itemRow}
+        lightColor="#f9f9f9"
+        darkColor="#1c1c1e"
+      >
+        <Image
+          style={styles.rewardPicture}
+          source={{ uri: item.rewardImage }}
+        />
         <View style={styles.formRow}>
+          <ThemedText type="subtitle" style={styles.itemTitle}>
+            {item.rewardName}
+          </ThemedText>
+          <ThemedText style={styles.itemSub}>
+            {item.rewardDescritpion}
+          </ThemedText>
+
           <View style={styles.costRow}>
             <MaterialCommunityIcons
               name="trophy-award"
               size={18}
               color="orange"
             />
-            <Text style={styles.pointsCount}>{item.rewardCost} points</Text>
+            <ThemedText style={styles.pointsCount}>
+              {item.rewardCost} points
+            </ThemedText>
           </View>
-
-          <Text style={styles.itemTitle}>{item.rewardName}</Text>
-          <Text style={styles.itemSub}>{item.rewardDescritpion}</Text>
 
           <View style={styles.pickerWrap}>
             <Picker
               selectedValue={targetId}
               onValueChange={(v) => setTarget(item.rewardID, v as string)}
               style={styles.picker}
+              itemStyle={styles.pickerItem}
             >
               <Picker.Item label="Choisir une cible…" value="" />
               {members.map((m) => (
@@ -150,129 +169,174 @@ export default function Recompenses() {
           <TouchableOpacity
             disabled={!canClaim}
             onPress={() => canClaim && handleClaim(item)}
+            style={[
+              styles.claimButton,
+              !canClaim && styles.claimButtonDisabled,
+            ]}
           >
-            <Text
-              style={canClaim ? styles.claimButton : styles.claimButtonDisabled}
-            >
+            <ThemedText style={styles.claimButtonText}>
               {canClaim
                 ? "Récupérer"
                 : enough
                 ? "Choisir une cible"
                 : `Il vous manque ${missing} points`}
-            </Text>
+            </ThemedText>
           </TouchableOpacity>
         </View>
-
-        <Image
-          style={styles.rewardPicture}
-          source={{ uri: item.rewardImage }}
-        />
-      </View>
+      </ThemedView>
     );
   };
   return (
-    <View style={styles.container}>
-      <Text>Récompenses</Text>
-      <Image
-        style={styles.avatar}
-        source={{
-          uri: `https://ui-avatars.com/api/?name=${encodeURIComponent(
-            user.memberUsername || "Membre"
-          )}&background=ff9800&color=ffffff`,
-        }}
-      />
-      <Text>{user.memberUsername}</Text>
-      <View style={styles.pointsRow}>
-        <MaterialCommunityIcons name="trophy-award" size={24} color="orange" />
-        <Text style={styles.pointsCount}>{user.memberPoints} points</Text>
+    <ThemedView
+      style={[
+        styles.container,
+        {
+          paddingTop: insets.top,
+          paddingBottom: insets.bottom,
+          paddingLeft: insets.left,
+          paddingRight: insets.right,
+        },
+      ]}
+    >
+      <ThemedText type="title" style={styles.title}>
+        Récompenses
+      </ThemedText>
+      <View style={styles.profileHeader}>
+        <Image
+          style={styles.avatar}
+          source={{
+            uri: `https://ui-avatars.com/api/?name=${encodeURIComponent(
+              user.memberUsername || "Membre"
+            )}&background=ff9800&color=ffffff`,
+          }}
+        />
+        <View>
+          <ThemedText type="subtitle">{user.memberUsername}</ThemedText>
+          <View style={styles.pointsRow}>
+            <MaterialCommunityIcons
+              name="trophy-award"
+              size={24}
+              color="orange"
+            />
+            <ThemedText style={styles.pointsCountLg}>
+              {user.memberPoints} points
+            </ThemedText>
+          </View>
+        </View>
       </View>
       <FlatList<Reward>
         style={styles.rewardsList}
         data={rewards}
         keyExtractor={(item) => item.rewardID}
         renderItem={renderItem}
+        contentContainerStyle={{ paddingHorizontal: 16 }}
       />
-    </View>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  title: {
+    textAlign: "center",
+    marginVertical: 20,
+  },
+  profileHeader: {
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-start",
-    backgroundColor: "white",
+    paddingHorizontal: 16,
+    marginBottom: 20,
   },
   avatar: {
-    width: "30%",
-    aspectRatio: 1 / 1,
-    borderRadius: "100%",
-    margin: 20,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginRight: 16,
   },
   pointsCount: {
     color: "orange",
+    fontWeight: "600",
+  },
+  pointsCountLg: {
+    color: "orange",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginLeft: 8,
   },
   pointsRow: {
-    display: "flex",
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    marginTop: 4,
   },
   rewardPicture: {
-    width: "30%",
-    aspectRatio: 2 / 1,
-    borderRadius: 8,
+    width: "100%",
+    height: 150,
+    borderRadius: 10,
     resizeMode: "cover",
+    marginBottom: 12,
   },
   itemRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 12,
-    width: "100%",
-    flexWrap: "wrap",
-    marginBottom: 30,
-    backgroundColor: "grey",
-    padding: 10,
+    marginBottom: 20,
     borderRadius: 10,
+    padding: 12,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   formRow: {
-    width: "60%",
+    width: "100%",
   },
   itemTitle: {
-    fontWeight: "700",
-    marginBottom: 2,
-    color: "black",
+    marginBottom: 4,
   },
   itemSub: {
-    color: "black",
-    marginBottom: 6,
+    marginBottom: 12,
+    opacity: 0.7,
   },
   costRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
+    marginBottom: 12,
   },
   claimButton: {
     backgroundColor: "orange",
-    padding: 10,
-    width: "auto",
-    borderRadius: 5,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: "center",
   },
   claimButtonDisabled: {
-    backgroundColor: "pink",
-    padding: 10,
-    width: "auto",
-    borderRadius: 5,
+    backgroundColor: "#E0E0E0",
+  },
+  claimButtonText: {
+    color: "white",
+    fontWeight: "bold",
   },
   rewardsList: {
-    paddingVertical: 20,
+    flex: 1,
   },
   pickerWrap: {
-    borderWidth: 1,
-    borderColor: "#ddd",
     borderRadius: 8,
     overflow: "hidden",
-    marginBottom: 8,
+    marginBottom: 12,
+    backgroundColor: Colors.dark.background,
+    borderWidth: 1,
+    borderColor: "#444",
   },
-  picker: { height: 150 },
+  picker: {
+    height: 150,
+    color: "white",
+  },
+  pickerItem: {
+    color: "white",
+    backgroundColor: Colors.dark.background,
+  },
 });
