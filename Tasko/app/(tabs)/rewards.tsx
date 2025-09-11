@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
 } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { Picker } from "@react-native-picker/picker";
+import React, { useState, useCallback } from "react";
 
 type Member = {
   memberId: string;
@@ -91,47 +93,83 @@ const rewards: Reward[] = [
   },
 ];
 
-function handleClaim(item: Reward) {
-  // logique de réclamation
-}
+export default function Recompenses() {
+  const [targets, setTargets] = useState<Record<string, string>>({});
 
-const renderItem: ListRenderItem<Reward> = ({ item }) => {
-  const canClaim = user.memberPoints >= item.rewardCost;
-  const missing = Math.max(0, item.rewardCost - user.memberPoints);
+  const setTarget = useCallback((rewardID: string, memberId: string) => {
+    setTargets((p) => ({ ...p, [rewardID]: memberId }));
+  }, []);
 
-  return (
-    <View style={styles.itemRow}>
-      <View style={styles.formRow}>
-        <View style={styles.costRow}>
-          <MaterialCommunityIcons
-            name="trophy-award"
-            size={18}
-            color="orange"
-          />
-          <Text style={styles.pointsCount}>{item.rewardCost} points</Text>
+  const handleClaim = useCallback(
+    (reward: Reward) => {
+      const targetId = targets[reward.rewardID];
+      if (!targetId) return;
+      // logique de réclamation avec targetId
+    },
+    [targets]
+  );
+
+  const renderItem: ListRenderItem<Reward> = ({ item }) => {
+    const targetId = targets[item.rewardID] ?? "";
+    const enough = user.memberPoints >= item.rewardCost;
+    const missing = Math.max(0, item.rewardCost - user.memberPoints);
+    const canClaim = enough && !!targetId;
+
+    return (
+      <View style={styles.itemRow}>
+        <View style={styles.formRow}>
+          <View style={styles.costRow}>
+            <MaterialCommunityIcons
+              name="trophy-award"
+              size={18}
+              color="orange"
+            />
+            <Text style={styles.pointsCount}>{item.rewardCost} points</Text>
+          </View>
+
+          <Text style={styles.itemTitle}>{item.rewardName}</Text>
+          <Text style={styles.itemSub}>{item.rewardDescritpion}</Text>
+
+          <View style={styles.pickerWrap}>
+            <Picker
+              selectedValue={targetId}
+              onValueChange={(v) => setTarget(item.rewardID, v as string)}
+              style={styles.picker}
+            >
+              <Picker.Item label="Choisir une cible…" value="" />
+              {members.map((m) => (
+                <Picker.Item
+                  key={m.memberId}
+                  label={m.memberUsername}
+                  value={m.memberId}
+                />
+              ))}
+            </Picker>
+          </View>
+
+          <TouchableOpacity
+            disabled={!canClaim}
+            onPress={() => canClaim && handleClaim(item)}
+          >
+            <Text
+              style={canClaim ? styles.claimButton : styles.claimButtonDisabled}
+            >
+              {canClaim
+                ? "Récupérer"
+                : enough
+                ? "Choisir une cible"
+                : `Il vous manque ${missing} points`}
+            </Text>
+          </TouchableOpacity>
         </View>
 
-        <Text style={styles.itemTitle}>{item.rewardName}</Text>
-        <Text style={styles.itemSub}>{item.rewardDescritpion}</Text>
-
-        <TouchableOpacity
-          disabled={!canClaim}
-          onPress={() => canClaim && handleClaim(item)}
-        >
-          <Text
-            style={canClaim ? styles.claimButton : styles.claimButtonDisabled}
-          >
-            {canClaim ? "Récupérer" : `Il vous manque ${missing} points`}
-          </Text>
-        </TouchableOpacity>
+        <Image
+          style={styles.rewardPicture}
+          source={{ uri: item.rewardImage }}
+        />
       </View>
-
-      <Image style={styles.rewardPicture} source={{ uri: item.rewardImage }} />
-    </View>
-  );
-};
-
-export default function Recompenses() {
+    );
+  };
   return (
     <View style={styles.container}>
       <Text>Récompenses</Text>
@@ -191,7 +229,6 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     gap: 12,
     width: "100%",
-    overflow: "hidden",
     flexWrap: "wrap",
     marginBottom: 30,
     backgroundColor: "grey",
@@ -230,4 +267,12 @@ const styles = StyleSheet.create({
   rewardsList: {
     paddingVertical: 20,
   },
+  pickerWrap: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    overflow: "hidden",
+    marginBottom: 8,
+  },
+  picker: { height: 150 },
 });
