@@ -1,11 +1,9 @@
 import { Tabs } from "expo-router";
 import React from "react";
-import { Platform, View } from "react-native";
-import Ionicons from "@expo/vector-icons/Ionicons";
+import { Platform } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { HapticTab } from "@/components/HapticTab";
 import { useTheme } from "react-native-paper";
-import { StyleSheet } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 
 export default function TabLayout() {
   const theme = useTheme();

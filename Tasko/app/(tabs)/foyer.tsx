@@ -9,7 +9,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { useTheme } from "react-native-paper";
-import Ionicons from "@expo/vector-icons/Ionicons";
+import { Ionicons } from "@expo/vector-icons";
 
 type Member = {
   memberId: string;

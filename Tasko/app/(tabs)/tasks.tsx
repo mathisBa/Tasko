@@ -1,20 +1,27 @@
-import { ThemedText } from "@/components/ThemedText";
-import { Pressable, SafeAreaView, StyleSheet, View } from "react-native";
+import { Pressable, SafeAreaView, StyleSheet, View, Text } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { FlashList } from "@shopify/flash-list";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React from "react";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { Link } from "expo-router";
 import { Checkbox } from "expo-checkbox";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
+import { useTheme } from "react-native-paper";
+
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 export default function TasksScreen() {
+  const theme = useTheme();
+  const fontBody = theme.fonts.bodyMedium.fontFamily;
+  const fontButton = theme.fonts.labelMedium.fontFamily;
+  const fontTitle = theme.fonts.titleMedium.fontFamily;
+
   const [tasks, setTasks] = React.useState<any[]>([]);
   const insets = useSafeAreaInsets();
+
   useFocusEffect(
     React.useCallback(() => {
       fetch(`${apiUrl}/api/tasks`, {
@@ -61,165 +68,192 @@ export default function TasksScreen() {
   };
 
   const renderFlashListItems = ({ item }: { item: any }) => (
-    <View style={styles.itemContainer}>
-      {getIconFromCategory(item.taskCategory)}
-      <View>
-        <ThemedText
-          darkColor={"white"}
-          lightColor={"white"}
-          style={
-            item.taskStatus === "done"
-              ? { textDecorationLine: "line-through" }
-              : {}
-          }
+    <View style={[styles.rowTask, { backgroundColor: theme.colors.surface }]}>
+      {getIconFromCategory(item.taskCategory, theme)}
+      <View style={{ flex: 1, marginHorizontal: 8 }}>
+        <Text
+          style={[
+            {
+              color: theme.colors.onBackground,
+              fontFamily: fontBody,
+              fontSize: 16,
+            },
+            item.taskStatus === "done" && {
+              textDecorationLine: "line-through",
+            },
+          ]}
         >
           {item.taskName}
-        </ThemedText>
-        <ThemedText
-          darkColor={"#ada692"}
-          lightColor={"#ada692"}
-          style={
-            item.taskStatus === "done"
-              ? { textDecorationLine: "line-through" }
-              : {}
-          }
+        </Text>
+        <Text
+          style={[
+            {
+              color: theme.colors.onBackground,
+              fontFamily: fontBody,
+              fontSize: 14,
+            },
+            item.taskStatus === "done" && {
+              textDecorationLine: "line-through",
+            },
+          ]}
         >
           {new Date(item.taskDate).toLocaleString("fr-FR", {
             dateStyle: "medium",
             timeStyle: "short",
           })}
-        </ThemedText>
+        </Text>
       </View>
       <Checkbox
         value={item.taskStatus === "done"}
         onValueChange={
           item.taskStatus === "done" ? undefined : () => setChecked(item)
         }
-        color={item.taskStatus === "done" ? "#ed8c37" : undefined}
+        color={item.taskStatus === "done" ? theme.colors.primary : undefined}
       />
     </View>
   );
 
   return (
     <View
-      style={{
-        flex: 1,
-        paddingTop: insets.top + 16,
-        paddingBottom: insets.bottom,
-        paddingLeft: insets.left,
-        paddingRight: insets.right,
-        backgroundColor: "#1B1611",
-        justifyContent: "flex-start",
-        flexDirection: "column",
-      }}
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
-      <View style={styles.titleContainer}>
+      <View style={styles.header}>
+        {/* Placeholder à gauche pour équilibrer le titre */}
         <View style={{ width: 28 }} />
-        <ThemedText darkColor={"white"} lightColor={"white"} type={"title"}>
+
+        {/* Titre centré */}
+        <Text
+          style={[
+            styles.title,
+            {
+              color: theme.colors.onBackground,
+              fontFamily: fontTitle,
+            },
+          ]}
+        >
           Tâches
-        </ThemedText>
+        </Text>
+
         <Link href="/addTask" asChild>
           <Pressable>
-            <MaterialIcons name="add" size={28} color="white" />
+            <Ionicons name="add" size={28} color={theme.colors.onBackground} />
           </Pressable>
         </Link>
       </View>
+
       <FlashList
         renderItem={renderFlashListItems}
         data={tasks}
         keyExtractor={(item) => item.id?.toString()}
-        ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
-        estimatedItemSize={50}
+        ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
       />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 32,
-    marginHorizontal: 16,
+  container: {
+    flex: 1,
+    padding: 10,
+    alignItems: "stretch",
+    justifyContent: "flex-start",
+    gap: 10,
   },
-  itemContainer: {
+  header: {
     flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    justifyContent: "space-around",
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
-    backgroundColor: "#3d2d1d",
-    borderRadius: 8,
-    borderColor: "#3d2d1d",
-    paddingVertical: 8,
-    marginHorizontal: 8,
+    width: "100%",
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+  },
+  headerList: {
+    display: "flex",
+    justifyContent: "flex-start",
+    textAlign: "left",
+    width: "100%",
+    paddingTop: 10,
+    paddingBottom: 10,
+  },
+  title: {
+    fontSize: 20,
+  },
+  rowTask: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    borderRadius: 5,
   },
 });
 
-const getIconFromCategory = (category: string) => {
+const getIconFromCategory = (category: string, theme: any) => {
+  const bgColor = "#583416ff";
+  const iconColor = theme.colors.primary || "#ed8c37";
+
   switch (category) {
     case "Cleaning":
       return (
-        <MaterialIcons
-          style={{ backgroundColor: "#724621", borderRadius: 8, padding: 8 }}
-          name="cleaning-services"
+        <Ionicons
+          style={{ padding: 8, borderRadius: 5, backgroundColor: bgColor }}
+          name="water-outline"
           size={24}
-          color="#ed8c37"
+          color={iconColor}
         />
       );
     case "Tidying":
       return (
-        <MaterialCommunityIcons
-          style={{ backgroundColor: "#724621FF", borderRadius: 8, padding: 8 }}
-          name="broom"
+        <Ionicons
+          style={{ padding: 8, borderRadius: 5, backgroundColor: bgColor }}
+          name="cube-outline"
           size={24}
-          color="#ed8c37"
+          color={iconColor}
         />
       );
     case "Laundry":
       return (
-        <MaterialCommunityIcons
-          style={{ backgroundColor: "#724621FF", borderRadius: 8, padding: 8 }}
-          name="tshirt-crew"
+        <Ionicons
+          style={{ padding: 8, borderRadius: 5, backgroundColor: bgColor }}
+          name="shirt-outline"
           size={24}
-          color="#ed8c37"
+          color={iconColor}
         />
       );
     case "Cooking":
       return (
-        <MaterialCommunityIcons
-          style={{ backgroundColor: "#724621FF", borderRadius: 8, padding: 8 }}
-          name="chef-hat"
+        <Ionicons
+          style={{ padding: 8, borderRadius: 5, backgroundColor: bgColor }}
+          name="restaurant-outline"
           size={24}
-          color="#ed8c37"
+          color={iconColor}
         />
       );
     case "Shopping":
       return (
-        <FontAwesome6
-          style={{ backgroundColor: "#724621FF", borderRadius: 8, padding: 8 }}
-          name="sack-dollar"
+        <Ionicons
+          style={{ padding: 8, borderRadius: 5, backgroundColor: bgColor }}
+          name="cart-outline"
           size={24}
-          color="#ed8c37"
+          color={iconColor}
         />
       );
     case "Housekeeping":
       return (
-        <MaterialCommunityIcons
-          style={{ backgroundColor: "#724621FF", borderRadius: 8, padding: 8 }}
-          name="home-heart"
+        <Ionicons
+          style={{ padding: 8, borderRadius: 5, backgroundColor: bgColor }}
+          name="home-outline"
           size={24}
-          color="#ed8c37"
+          color={iconColor}
         />
       );
     case "Gardening":
       return (
-        <MaterialCommunityIcons
-          style={{ backgroundColor: "#724621FF", borderRadius: 8, padding: 8 }}
-          name="flower-tulip"
+        <Ionicons
+          style={{ padding: 8, borderRadius: 5, backgroundColor: bgColor }}
+          name="flower-outline"
           size={24}
-          color="#ed8c37"
+          color={iconColor}
         />
       );
     default:
