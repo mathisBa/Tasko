@@ -7,12 +7,12 @@ import { Checkbox } from "expo-checkbox";
 import { useFocusEffect } from "@react-navigation/native";
 import { useTheme } from "react-native-paper";
 
-const apiUrl = process.env.EXPO_PUBLIC_API_URL;
-
 export default function TasksScreen() {
   const theme = useTheme();
   const fontBody = theme.fonts.bodyMedium.fontFamily;
   const fontTitle = theme.fonts.titleMedium.fontFamily;
+
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
   const [tasks, setTasks] = React.useState<any[]>([]);
 

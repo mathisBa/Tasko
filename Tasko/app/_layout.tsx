@@ -10,10 +10,13 @@ import {
   Provider as PaperProvider,
 } from "react-native-paper";
 import {
-  useFonts,
   Outfit_400Regular,
   Outfit_600SemiBold,
+  useFonts,
 } from "@expo-google-fonts/outfit";
+import React, { useEffect, useState } from "react";
+import { StateContext } from "./StateContext";
+import { scheduleNotifications } from "@/app/utils/notifications";
 
 const customLightTheme = {
   ...MD3LightTheme,
@@ -97,6 +100,7 @@ const customDarkTheme = {
 };
 
 export default function RootLayout() {
+  const [userId, setUserId] = useState<string | null>(null);
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
 
@@ -105,30 +109,46 @@ export default function RootLayout() {
     Outfit_600SemiBold,
   });
 
+  useEffect(() => {
+    scheduleNotifications();
+  }, []);
+
   if (!fontsLoaded) return null;
 
   const theme = colorScheme === "dark" ? customDarkTheme : customLightTheme;
 
   return (
-    <PaperProvider theme={theme}>
-      <View
-        style={[
-          styles.container,
-          {
-            paddingTop: insets.top,
-            paddingRight: insets.right,
-            paddingLeft: insets.left,
-          },
-        ]}
-      >
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="addTask" options={{ headerShown: false }} />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-      </View>
-      <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
-    </PaperProvider>
+    <StateContext.Provider value={{ userId, setUserId }}>
+      <PaperProvider theme={theme}>
+        <View
+          style={[
+            styles.container,
+            {
+              paddingTop: insets.top,
+              paddingRight: insets.right,
+              paddingLeft: insets.left,
+            },
+          ]}
+        >
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="addTask" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="auth"
+              options={{
+                title: "Authentification",
+                headerStyle: {
+                  backgroundColor: "#1B1611",
+                },
+                headerTintColor: "white",
+              }}
+            />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+        </View>
+        <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+      </PaperProvider>
+    </StateContext.Provider>
   );
 }
 
