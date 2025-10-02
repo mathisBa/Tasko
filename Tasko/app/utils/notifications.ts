@@ -36,47 +36,46 @@ export async function scheduleNotifications() {
       return;
     }
 
-    await Notifications.cancelAllScheduledNotificationsAsync();
-
+    const intervalTrigger: Notifications.TimeIntervalTriggerInput = {
+      seconds: 60,
+      repeats: true,
+      type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+    };
     await Notifications.scheduleNotificationAsync({
-      content: {
-        title: "Wake up",
-        body: "wake up",
-      },
-      // @ts-ignore
-      trigger: { seconds: 4, repeats: true },
+      content: { title: "Zzzz", body: "wake up" },
+      trigger: intervalTrigger,
     });
 
+    const morningTrigger: Notifications.DailyTriggerInput = {
+      hour: 10,
+      minute: 0,
+      type: Notifications.SchedulableTriggerInputTypes.DAILY,
+    };
     await Notifications.scheduleNotificationAsync({
       content: {
         title: "Bonjour",
         body: "Prêt pour relever les défis de la journée ?",
       },
-      // @ts-ignore
-      trigger: {
-        hour: 10,
-        minute: 0,
-        repeats: true,
-      },
+      trigger: morningTrigger,
     });
 
+    const eveningTrigger: Notifications.DailyTriggerInput = {
+      hour: 18,
+      minute: 0,
+      type: Notifications.SchedulableTriggerInputTypes.DAILY,
+    };
     await Notifications.scheduleNotificationAsync({
-      content: {
-        title: "Tasko",
-        body: "Alors, à jour dans tes Tasks ? ",
-      },
-      // @ts-ignore
-      trigger: {
-        hour: 18,
-        minute: 0,
-        repeats: true,
-      },
+      content: { title: "Tasko", body: "Alors, à jour dans tes Tasks ?" },
+      trigger: eveningTrigger,
     });
+
+    console.log("Notifications planifiées avec succès !");
   } catch (error) {
     console.error("Error scheduling notifications:", error);
   }
 }
 
+// Handler iOS
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,

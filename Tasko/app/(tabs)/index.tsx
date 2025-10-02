@@ -6,6 +6,7 @@ export default function IndexScreen() {
   return (
     <ThemedView style={styles.container}>
       <ThemedText type="title">Accueil</ThemedText>
+      <ThemedText>TEST</ThemedText>
     </ThemedView>
   );
 }
