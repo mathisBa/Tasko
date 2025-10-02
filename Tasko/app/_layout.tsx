@@ -133,16 +133,7 @@ export default function RootLayout() {
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="addTask" options={{ headerShown: false }} />
-            <Stack.Screen
-              name="auth"
-              options={{
-                title: "Authentification",
-                headerStyle: {
-                  backgroundColor: "#1B1611",
-                },
-                headerTintColor: "white",
-              }}
-            />
+            <Stack.Screen name="auth" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" />
           </Stack>
         </View>
