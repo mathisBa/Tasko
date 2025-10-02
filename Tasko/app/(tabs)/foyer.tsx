@@ -6,10 +6,8 @@ import {
   TouchableOpacity,
   FlatList,
   ListRenderItem,
-  SafeAreaView,
   StyleSheet,
 } from "react-native";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useTheme } from "react-native-paper";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
@@ -132,7 +130,7 @@ export default function Foyer() {
           style={{
             color: theme.colors.onBackground,
             fontFamily: fontTitle,
-            fontSize: 14,
+            fontSize: 16,
           }}
         >
           Membres
@@ -153,6 +151,7 @@ export default function Foyer() {
           style={{
             color: theme.colors.onBackground,
             fontFamily: fontButton,
+            fontSize: 14,
           }}
         >
           Add
