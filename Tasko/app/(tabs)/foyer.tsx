@@ -1,4 +1,4 @@
-import React, {useContext} from "react";
+import React, { useContext } from "react";
 import {
   View,
   Text,
@@ -9,9 +9,9 @@ import {
   StyleSheet,
 } from "react-native";
 import { useTheme } from "react-native-paper";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { useFocusEffect, useRouter } from 'expo-router';
-import {StateContext} from "@/app/StateContext";
+import { Ionicons } from "@expo/vector-icons";
+import { useFocusEffect, useRouter } from "expo-router";
+import { StateContext } from "@/app/StateContext";
 
 type Member = {
   memberId: string;
@@ -52,12 +52,12 @@ const user: Member = {
 
 export default function Foyer() {
   const router = useRouter();
-  const {userId, setUserId} = useContext(StateContext);
+  const { userId, setUserId } = useContext(StateContext);
 
   useFocusEffect(
     React.useCallback(() => {
       if (!userId) {
-        router.replace('/auth');
+        router.replace("/auth");
       }
     }, [])
   );
