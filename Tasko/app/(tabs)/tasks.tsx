@@ -1,13 +1,9 @@
-import { Pressable, SafeAreaView, StyleSheet, View, Text } from "react-native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import { Pressable, StyleSheet, View, Text } from "react-native";
 import { FlashList } from "@shopify/flash-list";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React from "react";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
 import { Checkbox } from "expo-checkbox";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
 import { useTheme } from "react-native-paper";
 
@@ -16,11 +12,9 @@ const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 export default function TasksScreen() {
   const theme = useTheme();
   const fontBody = theme.fonts.bodyMedium.fontFamily;
-  const fontButton = theme.fonts.labelMedium.fontFamily;
   const fontTitle = theme.fonts.titleMedium.fontFamily;
 
   const [tasks, setTasks] = React.useState<any[]>([]);
-  const insets = useSafeAreaInsets();
 
   useFocusEffect(
     React.useCallback(() => {
@@ -118,10 +112,8 @@ export default function TasksScreen() {
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
       <View style={styles.header}>
-        {/* Placeholder à gauche pour équilibrer le titre */}
         <View style={{ width: 28 }} />
 
-        {/* Titre centré */}
         <Text
           style={[
             styles.title,
@@ -166,14 +158,6 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingVertical: 10,
     paddingHorizontal: 10,
-  },
-  headerList: {
-    display: "flex",
-    justifyContent: "flex-start",
-    textAlign: "left",
-    width: "100%",
-    paddingTop: 10,
-    paddingBottom: 10,
   },
   title: {
     fontSize: 20,
