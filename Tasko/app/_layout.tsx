@@ -14,6 +14,8 @@ import {
   Outfit_400Regular,
   Outfit_600SemiBold,
 } from "@expo-google-fonts/outfit";
+import { useEffect } from "react";
+import { scheduleNotifications } from "./utils/notifications";
 
 const customLightTheme = {
   ...MD3LightTheme,
@@ -104,6 +106,10 @@ export default function RootLayout() {
     Outfit_400Regular,
     Outfit_600SemiBold,
   });
+
+  useEffect(() => {
+    scheduleNotifications();
+  }, []);
 
   if (!fontsLoaded) return null;
 
