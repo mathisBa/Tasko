@@ -10,9 +10,9 @@ import { Link } from "expo-router";
 import { Checkbox } from "expo-checkbox";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
-const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 export default function TasksScreen() {
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
   const [tasks, setTasks] = React.useState<any[]>([]);
   const insets = useSafeAreaInsets();
   useFocusEffect(
