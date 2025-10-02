@@ -7,6 +7,7 @@ import {StateContext} from "@/app/StateContext";
 import {useRouter} from "expo-router";
 
 export default function AuthScreen() {
+    const apiUrl = process.env.EXPO_PUBLIC_API_URL;
     const router = useRouter();
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
@@ -21,7 +22,7 @@ export default function AuthScreen() {
             password: password,
         }
         if (isLogin) {
-            fetch("http://10.112.132.249:1337/api/auth/local", {
+            fetch(`${apiUrl}/api/auth/local`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -45,7 +46,7 @@ export default function AuthScreen() {
             // (data as any).memberFoyer = null;
             // (data as any).memberXP = 0;
             // (data as any).memberPoints = 0;
-            fetch("http://10.112.132.249:1337/api/auth/local/register", {
+            fetch(`${apiUrl}/api/auth/local/register`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

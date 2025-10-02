@@ -6,8 +6,9 @@ import {StyleSheet, View} from "react-native";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import {MD3DarkTheme, MD3LightTheme, Provider as PaperProvider,} from "react-native-paper";
 import {Outfit_400Regular, Outfit_600SemiBold, useFonts,} from "@expo-google-fonts/outfit";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {StateContext} from "./StateContext";
+import {scheduleNotifications} from "@/app/utils/notifications";
 
 const customLightTheme = {
     ...MD3LightTheme,
