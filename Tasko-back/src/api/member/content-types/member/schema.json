@@ -33,6 +33,12 @@
     },
     "memberPoints": {
       "type": "biginteger"
+    },
+    "user": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user",
+      "mappedBy": "member"
     }
   }
 }
