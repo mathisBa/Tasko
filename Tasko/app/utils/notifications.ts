@@ -37,7 +37,7 @@ export async function scheduleNotifications() {
     }
 
     const intervalTrigger: Notifications.TimeIntervalTriggerInput = {
-      seconds: 60,
+      seconds: 6000,
       repeats: true,
       type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
     };
