@@ -420,21 +420,14 @@ export interface ApiMemberMember extends Struct.CollectionTypeSchema {
       'api::member.member'
     > &
       Schema.Attribute.Private;
-    memberEmail: Schema.Attribute.Email;
     memberFoyer: Schema.Attribute.Relation<'oneToOne', 'api::foyer.foyer'>;
-    memberId: Schema.Attribute.UID;
-    memberPassword: Schema.Attribute.Password;
     memberPoints: Schema.Attribute.BigInteger;
-    memberUsername: Schema.Attribute.String;
     memberXP: Schema.Attribute.BigInteger;
     publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    user: Schema.Attribute.Relation<
-      'oneToOne',
-      'plugin::users-permissions.user'
-    >;
+    userId: Schema.Attribute.Integer;
   };
 }
 
@@ -988,7 +981,6 @@ export interface PluginUsersPermissionsUser
       'plugin::users-permissions.user'
     > &
       Schema.Attribute.Private;
-    member: Schema.Attribute.Relation<'oneToOne', 'api::member.member'>;
     password: Schema.Attribute.Password &
       Schema.Attribute.Private &
       Schema.Attribute.SetMinMaxLength<{

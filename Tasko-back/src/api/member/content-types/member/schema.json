@@ -11,22 +11,10 @@
   },
   "pluginOptions": {},
   "attributes": {
-    "memberId": {
-      "type": "uid"
-    },
-    "memberUsername": {
-      "type": "string"
-    },
     "memberFoyer": {
       "type": "relation",
       "relation": "oneToOne",
       "target": "api::foyer.foyer"
-    },
-    "memberEmail": {
-      "type": "email"
-    },
-    "memberPassword": {
-      "type": "password"
     },
     "memberXP": {
       "type": "biginteger"
@@ -34,11 +22,8 @@
     "memberPoints": {
       "type": "biginteger"
     },
-    "user": {
-      "type": "relation",
-      "relation": "oneToOne",
-      "target": "plugin::users-permissions.user",
-      "mappedBy": "member"
+    "userId": {
+      "type": "integer"
     }
   }
 }

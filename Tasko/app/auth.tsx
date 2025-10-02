@@ -42,10 +42,6 @@ export default function AuthScreen() {
             });
         } else {
             (data as any).username = username;
-            // (data as any).memberId = Crypto.randomUUID();
-            // (data as any).memberFoyer = null;
-            // (data as any).memberXP = 0;
-            // (data as any).memberPoints = 0;
             fetch(`${apiUrl}/api/auth/local/register`, {
                 method: "POST",
                 headers: {
@@ -54,11 +50,31 @@ export default function AuthScreen() {
                 body: JSON.stringify(data),
             }).then(async response => {
                 if (response.ok) {
-                    setIsLogin(true);
                     const responseData = await response.json();
-                    setUserId(responseData.user.id);
+                    const memberData = {
+                        memberFoyer: null,
+                        memberXP: 0,
+                        memberPoints: 0,
+                        userId: responseData.user.id,
+                    }
+                    fetch(`${apiUrl}/api/members`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({data: memberData}),
+                    }).then(async response => {
+                        if (response.ok) {
+                            setIsLogin(true);
+                            setUserId(responseData.user.id);
+                        } else {
+                            console.log("Response member pas ok : ", response.status);
+                        }
+                    }).catch(error => {
+                        console.error("Erreur lors de la création du member", error);
+                    })
                 } else {
-                    console.log("Response pas ok : ", response.status);
+                    console.log("Response register pas ok : ", response.status);
                 }
             }).catch(error => {
                 console.error("Erreur lors de l'inscription", error);
