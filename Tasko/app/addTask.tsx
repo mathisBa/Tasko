@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import {
   TextInput,
   StyleSheet,
@@ -16,6 +16,21 @@ import DateTimePicker, {
 import { Picker } from "@react-native-picker/picker";
 import { useTheme } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
+import { StateContext } from "./StateContext";
+
+type Member = {
+  id: string;
+  attributes: {
+    user: {
+      data: {
+        id: string;
+        attributes: {
+          username: string;
+        };
+      };
+    };
+  };
+};
 
 export default function AddTaskScreen() {
   const theme = useTheme();
@@ -29,9 +44,31 @@ export default function AddTaskScreen() {
   const [date, setDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
   const [pickerMode, setPickerMode] = useState<"date" | "time">("date");
+  const [members, setMembers] = useState<Member[]>([]);
+  const [selectedMember, setSelectedMember] = useState<string | null>(null);
+  const [creatorMemberId, setCreatorMemberId] = useState<string | null>(null);
 
+  const { foyerId, userId } = useContext(StateContext);
   const router = useRouter();
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+
+  useEffect(() => {
+    if (foyerId) {
+      fetch(`${apiUrl}/api/members?filters[memberFoyer][id][$eq]=${foyerId}&populate=user`)
+        .then((response) => response.json())
+        .then((data) => {
+          setMembers(data.data);
+          if (data.data.length > 0) {
+            setSelectedMember(data.data[0].id);
+            const creator = data.data.find((member: any) => member.attributes.user.data.id === userId);
+            if (creator) {
+              setCreatorMemberId(creator.id);
+            }
+          }
+        })
+        .catch((error) => console.error(error));
+    }
+  }, [foyerId, userId]);
 
   const handleAddTask = async () => {
     if (!taskName.trim() || !taskCategory.trim()) {
@@ -45,6 +82,8 @@ export default function AddTaskScreen() {
         taskDifficulty: taskDifficulty.trim(),
         taskDate: date.toISOString(),
         taskStatus: "todo",
+        taskMember: selectedMember,
+        taskCreator: creatorMemberId,
       };
       const response = await fetch(`${apiUrl}/api/tasks`, {
         method: "POST",
@@ -79,6 +118,37 @@ export default function AddTaskScreen() {
     setPickerMode("date");
     setShowPicker(true);
   };
+
+  if (!foyerId) {
+    return (
+      <View
+        style={[
+          styles.container,
+          { backgroundColor: theme.colors.background, justifyContent: "center" },
+        ]}
+      >
+        <View style={styles.noFoyerContainer}>
+          <Text style={[styles.title, { color: theme.colors.onBackground, fontFamily: fontTitle }]}>
+            Rejoignez ou créez un foyer pour ajouter une tâche
+          </Text>
+          <TouchableOpacity
+            style={[styles.bottomButton, { backgroundColor: theme.colors.primary }]}
+            onPress={() => router.push("/(tabs)/foyer")}
+          >
+            <Text
+              style={{
+                color: theme.colors.onBackground,
+                fontFamily: fontButton,
+                fontSize: 14,
+              }}
+            >
+              Aller à la page Foyer
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View
@@ -196,6 +266,32 @@ export default function AddTaskScreen() {
             <Picker.Item label="Jardinage" value="Gardening" />
           </Picker>
         </View>
+
+        <View
+          style={[styles.pickerWrap, { backgroundColor: theme.colors.surface }]}
+        >
+          <Picker
+            selectedValue={selectedMember}
+            onValueChange={(value) => setSelectedMember(value)}
+            style={[
+              styles.picker,
+              { color: theme.colors.onSurface, fontFamily: fontBody },
+            ]}
+            itemStyle={{
+              backgroundColor: theme.colors.surface,
+              color: theme.colors.onSurface,
+              fontFamily: fontBody,
+            }}
+          >
+            {members.map((member) => (
+              <Picker.Item
+                key={member.id}
+                label={member.attributes.user.data.attributes.username}
+                value={member.id}
+              />
+            ))}
+          </Picker>
+        </View>
       </ScrollView>
 
       <TouchableOpacity
@@ -260,5 +356,13 @@ const styles = StyleSheet.create({
     width: "100%",
     padding: 10,
     borderRadius: 5,
+  },
+  noFoyerContainer: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 20,
+    width: "100%",
+    padding: 20,
   },
 });

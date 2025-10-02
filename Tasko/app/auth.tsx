@@ -24,9 +24,9 @@ export default function AuthScreen() {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const { userId, setUserId } = useContext(StateContext);
+  const { userId, setUserId, foyerId, setFoyerId } = useContext(StateContext);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     let data = {
       email: email,
       password: password,
@@ -44,9 +44,18 @@ export default function AuthScreen() {
       })
         .then(async (response) => {
           const data = await response.json();
-          console.log("User profile", data.user);
-          console.log("User token", data.jwt);
           setUserId(data.user.id);
+
+          // Fetch member data to get foyerId
+          const memberResponse = await fetch(
+            `${apiUrl}/api/members?filters[userId][$eq]=${data.user.id}`
+          );
+          const memberData = await memberResponse.json();
+          console.log(memberData);
+          if (memberData.data && memberData.data.length > 0) {
+            setFoyerId(memberData.data[0].attributes?.memberFoyer?.data?.id);
+          }
+
           router.replace("/foyer");
         })
         .catch((error) => {
@@ -54,47 +63,44 @@ export default function AuthScreen() {
         });
     } else {
       (data as any).username = username;
-      fetch(`${apiUrl}/api/auth/local/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      })
-        .then(async (response) => {
-          if (response.ok) {
-            const responseData = await response.json();
-            const memberData = {
-              memberFoyer: null,
-              memberXP: 0,
-              memberPoints: 0,
-              userId: responseData.user.id,
-            };
-            fetch(`${apiUrl}/api/members`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ data: memberData }),
-            })
-              .then(async (response) => {
-                if (response.ok) {
-                  setIsLogin(true);
-                  setUserId(responseData.user.id);
-                } else {
-                  console.log("Response member pas ok : ", response.status);
-                }
-              })
-              .catch((error) => {
-                console.error("Erreur lors de la création du member", error);
-              });
-          } else {
-            console.log("Response register pas ok : ", response.status);
-          }
-        })
-        .catch((error) => {
-          console.error("Erreur lors de l'inscription", error);
+      try {
+        const response = await fetch(`${apiUrl}/api/auth/local/register`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
         });
+
+        if (response.ok) {
+          const responseData = await response.json();
+          const memberData = {
+            memberFoyer: null,
+            memberXP: 0,
+            memberPoints: 0,
+            userId: responseData.user.id,
+          };
+
+          const memberResponse = await fetch(`${apiUrl}/api/members`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ data: memberData }),
+          });
+
+          if (memberResponse.ok) {
+            setIsLogin(true);
+            setUserId(responseData.user.id);
+          } else {
+            console.log("Response member pas ok : ", memberResponse.status);
+          }
+        } else {
+          console.log("Response register pas ok : ", response.status);
+        }
+      } catch (error) {
+        console.error("Erreur lors de l'inscription", error);
+      }
     }
   };
 

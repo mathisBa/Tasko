@@ -101,6 +101,7 @@ const customDarkTheme = {
 
 export default function RootLayout() {
   const [userId, setUserId] = useState<string | null>(null);
+  const [foyerId, setFoyerId] = useState<string | null>(null);
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
 
@@ -118,7 +119,7 @@ export default function RootLayout() {
   const theme = colorScheme === "dark" ? customDarkTheme : customLightTheme;
 
   return (
-    <StateContext.Provider value={{ userId, setUserId }}>
+    <StateContext.Provider value={{ userId, setUserId, foyerId, setFoyerId }}>
       <PaperProvider theme={theme}>
         <View
           style={[
@@ -133,6 +134,7 @@ export default function RootLayout() {
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="addTask" options={{ headerShown: false }} />
+            <Stack.Screen name="createFoyer" options={{ headerShown: false }} />
             <Stack.Screen name="auth" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" />
           </Stack>
