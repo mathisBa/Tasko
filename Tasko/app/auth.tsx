@@ -26,6 +26,7 @@ export default function AuthScreen() {
   const [password, setPassword] = useState("");
   const { userId, setUserId } = useContext(StateContext);
   const { userDocId, setUserDocId } = useContext(StateContext);
+    const [errorMessage, setErrorMessage] = useState("");
 
   const handleSubmit = () => {
     let data = {
@@ -45,9 +46,11 @@ export default function AuthScreen() {
       })
         .then(async (response) => {
           const data = await response.json();
-          console.log("User profile", data.user);
-          console.log("User token", data.jwt);
           try {
+            if (! data.user || ! data.user.id) {
+                setErrorMessage("Échec de la connexion. Vérifiez vos identifiants.");
+                return;
+            }
             const response = await fetch(
               `${apiUrl}/api/members?filters[userId][$eq]=` + data.user.id
             );
@@ -146,6 +149,18 @@ export default function AuthScreen() {
       </View>
 
       <View style={styles.formContainer}>
+        {errorMessage && (
+            <Text
+                style={{
+                  color: theme.colors.error || "red",
+                  textAlign: "center",
+                  marginBottom: 8,
+                  fontFamily: fontBody,
+                }}
+            >
+              {errorMessage}
+            </Text>
+        )}
         {!isLogin && (
           <TextInput
             style={[
