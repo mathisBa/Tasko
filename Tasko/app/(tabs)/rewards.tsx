@@ -42,28 +42,28 @@ const rewards: Reward[] = [
   },
   {
     rewardID: "2",
-    rewardName: "Envoyer une notification",
+    rewardName: "Changer le nom de quelqu'un temporairement",
     rewardCost: 250,
     rewardDescription:
-      "Vous avez la possibilité d'envoyer une notification à la personne de votre choix",
+      "Permet de modifier temporairement le nom affiché d'un membre.",
     rewardImage:
       "https://media.istockphoto.com/id/638219322/fr/photo/cest-lui-qui-apporte-de-lhumour-%C3%A0-l%C3%A9quipe.jpg?s=612x612&w=0&k=20&c=cOHtXAlwb40AT_wusJRED1M8k9J3DQbl6WdBLMkO2-w=",
   },
   {
     rewardID: "3",
-    rewardName: "Envoyer une notification",
+    rewardName: "Changer la photo de profil de quelqu'un",
     rewardCost: 300,
     rewardDescription:
-      "Vous avez la possibilité d'envoyer une notification à la personne de votre choix",
+      "Permet de changer temporairement la photo de profil d'un membre.",
     rewardImage:
       "https://media.istockphoto.com/id/1496943731/fr/photo/jeune-belle-femme-aux-cheveux-roux-caucasiens-riant-%C3%A0-la-cam%C3%A9ra-portrait-fond-vert.jpg?s=612x612&w=0&k=20&c=9V_v3TLReC_gJ6dNfagaV6NRUPS-6RH9d4zxln2UdTs=",
   },
   {
     rewardID: "4",
-    rewardName: "Envoyer une notification",
+    rewardName: "Envoyer un message personnalisé à quelqu'un",
     rewardCost: 400,
     rewardDescription:
-      "Vous avez la possibilité d'envoyer une notification à la personne de votre choix",
+      "Permet d'envoyer un message personnalisé au membre de votre choix.",
     rewardImage:
       "https://img.freepik.com/photos-gratuite/jeune-femme-afro-americaine-portant-salopettes_273609-10360.jpg?semt=ais_hybrid&w=740&q=80",
   },
