@@ -59,7 +59,7 @@ export default function Foyer() {
           if (responseData.data.length > 0) {
             const fetchedFoyer = responseData.data[0];
             if (fetchedFoyer.memberFoyer) {
-              setFoyerId(fetchedFoyer.memberFoyer.id);
+              setFoyerId(fetchedFoyer.memberFoyer.documentId);
               setFoyer(fetchedFoyer.memberFoyer);
             } else {
               setFoyerId(null);
@@ -74,6 +74,39 @@ export default function Foyer() {
 
     fetchFoyer();
   }, [userId]);
+
+  useEffect(() => {
+    const fetchFoyerMembers = async () => {
+      if (foyerId) {
+        try {
+          const response = await fetch(
+            `${apiUrl}/api/foyers/${foyerId}?populate=members`
+          );
+          const responseData = await response.json();
+
+          if (responseData.data) {
+            const fetchedFoyer = responseData.data;
+            if (fetchedFoyer.members) {
+              const members: Member[] = fetchedFoyer.members.map(
+                (item: any) => ({
+                  id: item.userId,
+                  username: item.memberUsername,
+                  xp: item.memberXP,
+                  points: item.memberPoints,
+                })
+              );
+              setMembers(members);
+            } else {
+              setMembers([]);
+            }
+          }
+        } catch (error) {
+          console.error("Failed to fetch or create foyer:", error);
+        }
+      }
+    };
+    fetchFoyerMembers();
+  }, [foyerId]);
 
   const theme = useTheme();
   const fontBody = theme.fonts.bodyMedium.fontFamily;
