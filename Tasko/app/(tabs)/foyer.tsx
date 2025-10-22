@@ -119,6 +119,7 @@ export default function Foyer() {
           },
         }),
       });
+      setFoyerId(foyerId);
     } catch (error) {
       console.error("Erreur createFoyer :", error);
       alert("Une erreur est survenue.");
