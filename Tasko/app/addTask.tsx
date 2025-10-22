@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {
   TextInput,
   StyleSheet,
@@ -16,6 +16,13 @@ import DateTimePicker, {
 import { Picker } from "@react-native-picker/picker";
 import { useTheme } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
+import StateContext from "@/app/StateContext";
+import MemberPicker from "@/components/MemberPicker";
+
+type Member = {
+  id: string;
+  username: string;
+};
 
 export default function AddTaskScreen() {
   const theme = useTheme();
@@ -29,6 +36,10 @@ export default function AddTaskScreen() {
   const [date, setDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
   const [pickerMode, setPickerMode] = useState<"date" | "time">("date");
+  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
+  const { foyerId, setFoyerId } = useContext(StateContext);
+  const { userDocId } = useContext(StateContext);
+  const [members, setMembers] = useState<Member[]>([]);
 
   const router = useRouter();
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
@@ -45,6 +56,8 @@ export default function AddTaskScreen() {
         taskDifficulty: taskDifficulty.trim(),
         taskDate: date.toISOString(),
         taskStatus: "todo",
+        taskMember: selectedMember ? selectedMember.id : null,
+        taskCreator: userDocId
       };
       const response = await fetch(`${apiUrl}/api/tasks`, {
         method: "POST",
@@ -79,6 +92,39 @@ export default function AddTaskScreen() {
     setPickerMode("date");
     setShowPicker(true);
   };
+
+  useEffect(() => {
+    const fetchFoyerMembers = async () => {
+      if (foyerId) {
+        try {
+          const response = await fetch(
+              `${apiUrl}/api/foyers/${foyerId}?populate=members`
+          );
+          const responseData = await response.json();
+
+          if (responseData.data) {
+            const fetchedFoyer = responseData.data;
+            if (fetchedFoyer.members) {
+              const members: Member[] = fetchedFoyer.members.map(
+                  (item: any) => ({
+                    id: item.documentId,
+                    username: item.memberUsername
+                  })
+              );
+              setMembers(members);
+              setSelectedMember(members[0]);
+            } else {
+              setMembers([]);
+            }
+          }
+        } catch (error) {
+          console.error("Failed to fetch or create foyer:", error);
+        }
+      }
+    };
+    fetchFoyerMembers();
+  }, [foyerId]);
+
 
   return (
     <View
@@ -149,6 +195,15 @@ export default function AddTaskScreen() {
             minimumDate={new Date()}
           />
         )}
+
+        <View
+          style={[styles.pickerWrap, { backgroundColor: theme.colors.surface }]}
+        >
+          <MemberPicker members={members} style={[
+            styles.picker,
+            { color: theme.colors.onSurface, fontFamily: fontBody },
+          ]} setSelectedMember={setSelectedMember} selectedMember={selectedMember}/>
+        </View>
 
         <View
           style={[styles.pickerWrap, { backgroundColor: theme.colors.surface }]}

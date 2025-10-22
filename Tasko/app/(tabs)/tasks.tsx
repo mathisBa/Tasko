@@ -1,11 +1,12 @@
 import { Pressable, StyleSheet, View, Text } from "react-native";
 import { FlashList } from "@shopify/flash-list";
-import React from "react";
+import React, {useContext} from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
 import { Checkbox } from "expo-checkbox";
 import { useFocusEffect } from "@react-navigation/native";
 import { useTheme } from "react-native-paper";
+import StateContext from "@/app/StateContext";
 
 export default function TasksScreen() {
   const theme = useTheme();
@@ -13,12 +14,12 @@ export default function TasksScreen() {
   const fontTitle = theme.fonts.titleMedium.fontFamily;
 
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+  const { userDocId } = useContext(StateContext);
 
   const [tasks, setTasks] = React.useState<any[]>([]);
-
   useFocusEffect(
     React.useCallback(() => {
-      fetch(`${apiUrl}/api/tasks`, {
+      fetch(`${apiUrl}/api/tasks?filters[taskMember][documentId][$eq]=${userDocId}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
