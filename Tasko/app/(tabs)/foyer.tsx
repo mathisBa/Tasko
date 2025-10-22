@@ -208,7 +208,7 @@ export default function Foyer() {
         </View>
       </View>
       <TouchableOpacity
-        disabled={!(foyer && userId === foyer.owner)}
+        disabled={!(foyer && userId === foyer.owner && item.id != foyer.owner)}
         onPress={() => {
           if (foyer && userId === foyer.owner) {
           }
