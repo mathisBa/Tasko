@@ -19,7 +19,7 @@ export default function TasksScreen() {
   const [tasks, setTasks] = React.useState<any[]>([]);
   useFocusEffect(
     React.useCallback(() => {
-      fetch(`${apiUrl}/api/tasks?filters[taskMember][documentId][$eq]=${userDocId}`, {
+      fetch(`${apiUrl}/api/tasks?filters[taskMember][documentId][$eq]=${userDocId}&populate=taskMember`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -38,8 +38,29 @@ export default function TasksScreen() {
     }, [])
   );
 
-  const setChecked = async (checkedItem: any) => {
+  const setChecked = async (checkedItem : any) => {
     checkedItem.taskStatus = "done";
+
+    let gainedXP = 0;
+    let gainedPoints = 0;
+
+    switch (checkedItem.taskDifficulty) {
+      case "easy":
+        gainedXP = 10;
+        gainedPoints = 5;
+        break;
+      case "medium":
+        gainedXP = 20;
+        gainedPoints = 10;
+        break;
+      case "complex":
+        gainedXP = 40;
+        gainedPoints = 20;
+        break;
+      default:
+        break;
+    }
+
     try {
       await fetch(`${apiUrl}/api/tasks/${checkedItem.documentId}`, {
         method: "PUT",
@@ -50,17 +71,40 @@ export default function TasksScreen() {
           data: { taskStatus: checkedItem.taskStatus },
         }),
       });
+
+      const memberId = checkedItem.taskMember?.documentId || checkedItem.taskMember?.id;
+      if (!memberId) throw new Error("Aucun membre lié à cette tâche.");
+
+      const memberRes = await fetch(`${apiUrl}/api/members/${memberId}`);
+      const memberData = await memberRes.json();
+      const currentXP = memberData.data.memberXP || 0;
+      const currentPoints = memberData.data.memberPoints || 0;
+
+      await fetch(`${apiUrl}/api/members/${memberId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          data: {
+            memberXP: Number(currentXP) + Number(gainedXP),
+            memberPoints: Number(currentPoints) + Number(gainedPoints),
+          },
+        }),
+      });
+
       setTasks((prevTasks) =>
-        prevTasks.map((task) =>
-          task.id === checkedItem.id
-            ? { ...task, taskStatus: checkedItem.taskStatus }
-            : task
-        )
+          prevTasks.map((task) =>
+              task.id === checkedItem.id
+                  ? { ...task, taskStatus: checkedItem.taskStatus }
+                  : task
+          )
       );
     } catch (error) {
       console.error("Erreur lors de la mise à jour du statut :", error);
     }
   };
+
 
   const renderFlashListItems = ({ item }: { item: any }) => (
     <View style={[styles.rowTask, { backgroundColor: theme.colors.surface }]}>
