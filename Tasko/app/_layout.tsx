@@ -17,6 +17,9 @@ import {
 import React, { useEffect, useState } from "react";
 import { StateContext } from "./StateContext";
 import { scheduleNotifications } from "@/app/utils/notifications";
+import * as SplashScreen from "expo-splash-screen";
+
+SplashScreen.preventAutoHideAsync();
 
 const customLightTheme = {
   ...MD3LightTheme,
@@ -114,6 +117,15 @@ export default function RootLayout() {
   useEffect(() => {
     scheduleNotifications();
   }, []);
+
+  useEffect(() => {
+    async function hideSplash() {
+      if (fontsLoaded) {
+        await SplashScreen.hideAsync();
+      }
+    }
+    hideSplash();
+  }, [fontsLoaded]);
 
   if (!fontsLoaded) return null;
 
