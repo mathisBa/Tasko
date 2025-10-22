@@ -89,72 +89,59 @@ export default function Foyer() {
     }, [userId])
   );
 
-  useEffect(() => {
-    const fetchFoyer = async () => {
-      if (userId) {
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchAll = async () => {
         try {
-          const response = await fetch(
-            `${apiUrl}/api/members?filters[userId][$eq]=` +
-              userId +
-              "&populate[memberFoyer][populate]=foyerOwner"
+          const res = await fetch(
+            `${apiUrl}/api/members?filters[userId][$eq]=${userId}&populate[memberFoyer][populate]=foyerOwner`
           );
-          const responseData = await response.json();
-          if (responseData.data.length > 0) {
-            const fetchedFoyer = responseData.data[0];
-            if (fetchedFoyer.memberFoyer) {
-              setFoyerId(fetchedFoyer.memberFoyer.documentId);
+          const data = await res.json();
+
+          if (data.data.length > 0) {
+            const member = data.data[0];
+            if (member.memberFoyer) {
+              const currentFoyerId = member.memberFoyer.documentId;
+              setFoyerId(currentFoyerId);
               setFoyer({
-                id: fetchedFoyer.memberFoyer.documentId,
-                owner: fetchedFoyer.memberFoyer.foyerOwner.userId,
+                id: currentFoyerId,
+                owner: member.memberFoyer.foyerOwner.userId,
                 members: [],
               });
-            } else {
-              setFoyerId(null);
-              setFoyer(null);
-            }
-          }
-        } catch (error) {
-          console.error("Failed to fetch or create foyer:", error);
-        }
-      }
-    };
 
-    fetchFoyer();
-  }, [userId]);
-
-  useEffect(() => {
-    const fetchFoyerMembers = async () => {
-      if (foyerId) {
-        try {
-          const response = await fetch(
-            `${apiUrl}/api/foyers/${foyerId}?populate=members`
-          );
-          const responseData = await response.json();
-
-          if (responseData.data) {
-            const fetchedFoyer = responseData.data;
-            if (fetchedFoyer.members) {
-              const members: Member[] = fetchedFoyer.members.map(
-                (item: any) => ({
-                  id: item.userId,
-                  docId: item.documentId,
-                  username: item.memberUsername,
-                  xp: item.memberXP,
-                  points: item.memberPoints,
-                })
+              const membersRes = await fetch(
+                `${apiUrl}/api/foyers/${currentFoyerId}?populate=members`
               );
-              setMembers(members);
+              const membersData = await membersRes.json();
+
+              if (membersData.data?.members) {
+                const fetchedMembers: Member[] = membersData.data.members.map(
+                  (item: any) => ({
+                    id: item.userId,
+                    docId: item.documentId,
+                    username: item.memberUsername,
+                    xp: item.memberXP,
+                    points: item.memberPoints,
+                  })
+                );
+                setMembers(fetchedMembers);
+              } else {
+                setMembers([]);
+              }
             } else {
+              setFoyer(null);
+              setFoyerId(null);
               setMembers([]);
             }
           }
         } catch (error) {
-          console.error("Failed to fetch or create foyer:", error);
+          console.error("Erreur lors du refresh foyer :", error);
         }
-      }
-    };
-    fetchFoyerMembers();
-  }, [foyerId]);
+      };
+
+      fetchAll();
+    }, [userId])
+  );
 
   const theme = useTheme();
   const fontBody = theme.fonts.bodyMedium.fontFamily;
