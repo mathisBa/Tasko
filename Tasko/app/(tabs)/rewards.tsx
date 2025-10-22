@@ -13,6 +13,7 @@ import React, {useState, useCallback, useContext, useEffect} from "react";
 import { useTheme } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
 import StateContext from "@/app/StateContext";
+import { useRouter } from "expo-router";
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 type Member = {
@@ -77,9 +78,9 @@ export default function Recompenses() {
     memberXP: 0,
     memberPoints: 0,
   });
-  const { foyerId } = useContext(StateContext);
-  const { userId, userDocId } = useContext(StateContext);
+  const { foyerId, setFoyerId, userId, setUserId, userDocId, setUserDocId } = useContext(StateContext);
   const theme = useTheme();
+  const router = useRouter();
   const fontBody = theme.fonts.bodyMedium.fontFamily;
   const fontButton = theme.fonts.labelMedium.fontFamily;
   const fontTitle = theme.fonts.titleMedium.fontFamily;
@@ -120,6 +121,13 @@ export default function Recompenses() {
     };
     fetchFoyerMembers();
   }, [foyerId, userDocId, userId]);
+
+  const handleLogout = () => {
+    setUserId(null);
+    setUserDocId(null);
+    setFoyerId(null);
+    router.push('/');
+  };
 
 
   const cleanHex = (color: string) => color.replace("#", "").substring(0, 6);
@@ -269,6 +277,9 @@ export default function Recompenses() {
         >
           Récompenses
         </Text>
+          {userId && <TouchableOpacity onPress={handleLogout} style={{position: 'absolute', right: 0}}>
+              <Ionicons name="log-out-outline" size={24} color={theme.colors.onBackground} />
+          </TouchableOpacity>}
       </View>
 
       <View style={styles.profileHeader}>
@@ -344,8 +355,10 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   header: {
-    display: "flex",
-    justifyContent: "center",
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
     paddingTop: 10,
     paddingBottom: 10,
   },

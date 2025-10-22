@@ -135,7 +135,9 @@ export default function Foyer() {
             }
           }
         } catch (error) {
-          console.error("Erreur lors du refresh foyer :", error);
+          if (userId) {
+            console.error("Erreur lors du refresh foyer :", error);
+          }
         }
       };
 
