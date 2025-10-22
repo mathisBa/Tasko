@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,60 +7,110 @@ import {
   FlatList,
   ListRenderItem,
   StyleSheet,
+  TextInput,
 } from "react-native";
 import { useTheme } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import { StateContext } from "@/app/StateContext";
 
+const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+
 type Member = {
-  memberId: string;
-  memberUsername: string;
-  memberXP: number;
-  memberPoints: number;
+  id: string;
+  username: string;
+  xp: number;
+  points: number;
 };
 
-const members: Member[] = [
-  {
-    memberId: "memberId124",
-    memberUsername: "Benoit saint denis",
-    memberXP: 720,
-    memberPoints: 30,
-  },
-  {
-    memberId: "memberId123",
-    memberUsername: "Ethan Carter",
-    memberXP: 750,
-    memberPoints: 300,
-  },
-  {
-    memberId: "memberId125",
-    memberUsername: "Miley Cirus",
-    memberXP: 50,
-    memberPoints: 1,
-  },
-];
-
-const data: Member[] = [...members].sort((a, b) => b.memberXP - a.memberXP);
-const foyerOwnerID = "memberId125";
-const user: Member = {
-  memberId: "memberId124",
-  memberUsername: "Benoit saint denis",
-  memberXP: 720,
-  memberPoints: 30,
+type Foyer = {
+  id: string;
+  owner: string;
+  members: Member[];
 };
 
 export default function Foyer() {
   const router = useRouter();
   const { userId, setUserId } = useContext(StateContext);
+  const { userDocId, setUserDocId } = useContext(StateContext);
+  const { foyerId, setFoyerId } = useContext(StateContext);
+  const [foyer, setFoyer] = useState<Foyer | null>(null);
+  const [members, setMembers] = useState<Member[]>([]);
+  const [foyerName, setFoyerName] = useState("");
 
   useFocusEffect(
     React.useCallback(() => {
       if (!userId) {
         router.replace("/auth");
       }
-    }, [])
+    }, [userId])
   );
+
+  useEffect(() => {
+    const fetchFoyer = async () => {
+      if (userId) {
+        try {
+          const response = await fetch(
+            `${apiUrl}/api/members?filters[userId][$eq]=` +
+              userId +
+              "&populate[memberFoyer][populate]=foyerOwner"
+          );
+          const responseData = await response.json();
+          if (responseData.data.length > 0) {
+            const fetchedFoyer = responseData.data[0];
+            if (fetchedFoyer.memberFoyer) {
+              setFoyerId(fetchedFoyer.memberFoyer.documentId);
+              setFoyer({
+                id: fetchedFoyer.memberFoyer.documentId,
+                owner: fetchedFoyer.memberFoyer.foyerOwner.userId,
+                members: [],
+              });
+            } else {
+              setFoyerId(null);
+              setFoyer(null);
+            }
+          }
+        } catch (error) {
+          console.error("Failed to fetch or create foyer:", error);
+        }
+      }
+    };
+
+    fetchFoyer();
+  }, [userId]);
+
+  useEffect(() => {
+    const fetchFoyerMembers = async () => {
+      if (foyerId) {
+        try {
+          const response = await fetch(
+            `${apiUrl}/api/foyers/${foyerId}?populate=members`
+          );
+          const responseData = await response.json();
+
+          if (responseData.data) {
+            const fetchedFoyer = responseData.data;
+            if (fetchedFoyer.members) {
+              const members: Member[] = fetchedFoyer.members.map(
+                (item: any) => ({
+                  id: item.userId,
+                  username: item.memberUsername,
+                  xp: item.memberXP,
+                  points: item.memberPoints,
+                })
+              );
+              setMembers(members);
+            } else {
+              setMembers([]);
+            }
+          }
+        } catch (error) {
+          console.error("Failed to fetch or create foyer:", error);
+        }
+      }
+    };
+    fetchFoyerMembers();
+  }, [foyerId]);
 
   const theme = useTheme();
   const fontBody = theme.fonts.bodyMedium.fontFamily;
@@ -68,6 +118,50 @@ export default function Foyer() {
   const fontTitle = theme.fonts.titleMedium.fontFamily;
 
   const cleanHex = (color: string) => color.replace("#", "").substring(0, 6);
+
+  const createFoyer = async (foyerName: string) => {
+    if (!foyerName.trim()) {
+      alert("Le nom du foyer est obligatoire.");
+      return;
+    }
+
+    try {
+      const foyerRes = await fetch(`${apiUrl}/api/foyers`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          data: {
+            foyerName: foyerName.trim(),
+            foyerOwner: userDocId,
+          },
+        }),
+      });
+
+      const foyerData = await foyerRes.json();
+
+      if (!foyerRes.ok || !foyerData.data || !foyerData.data.id) {
+        console.error("Erreur création foyer :", foyerData);
+        alert("Échec de la création du foyer.");
+        return;
+      }
+
+      const foyerId = foyerData.data.documentId;
+
+      const addFoyerUser = await fetch(`${apiUrl}/api/members/${userDocId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          data: {
+            memberFoyer: foyerId,
+          },
+        }),
+      });
+      setFoyerId(foyerId);
+    } catch (error) {
+      console.error("Erreur createFoyer :", error);
+      alert("Une erreur est survenue.");
+    }
+  };
 
   const renderItem: ListRenderItem<Member> = ({ item, index }) => (
     <View style={[styles.rowMember, { backgroundColor: theme.colors.surface }]}>
@@ -88,7 +182,7 @@ export default function Foyer() {
           style={styles.avatar}
           source={{
             uri: `https://ui-avatars.com/api/?name=${encodeURIComponent(
-              item.memberUsername || "Membre"
+              item.username || "Membre"
             )}&background=${cleanHex(theme.colors.primary)}&color=ffffff`,
           }}
         />
@@ -101,8 +195,7 @@ export default function Foyer() {
               fontSize: 16,
             }}
           >
-            {item.memberUsername}{" "}
-            {item.memberId === user.memberId ? "(Vous)" : ""}
+            {item.username} {item.id === userId ? "(Vous)" : ""}
           </Text>
           <Text
             style={{
@@ -110,7 +203,7 @@ export default function Foyer() {
               fontFamily: fontBody,
             }}
           >
-            {item.memberId === foyerOwnerID ? "Propriétaire" : "Membre"}
+            {foyer && item.id === foyer.owner ? "Propriétaire" : "Membre"}
           </Text>
         </View>
       </View>
@@ -121,60 +214,96 @@ export default function Foyer() {
   );
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-    >
-      <View style={styles.header}>
-        <Text
-          style={[
-            styles.title,
-            {
+    <View style={styles.container}>
+      {foyerId ? (
+        <>
+          <View style={styles.headerList}>
+            <Text
+              style={{
+                color: theme.colors.onBackground,
+                fontFamily: fontTitle,
+                fontSize: 16,
+              }}
+            >
+              Membres
+            </Text>
+          </View>
+
+          <FlatList
+            data={members.sort((a, b) => b.xp - a.xp)}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={renderItem}
+            ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+          />
+
+          <TouchableOpacity
+            style={[
+              styles.bottomButton,
+              { backgroundColor: theme.colors.primary },
+            ]}
+          >
+            <Text
+              style={{
+                color: theme.colors.onBackground,
+                fontFamily: fontButton,
+                fontSize: 14,
+              }}
+            >
+              Add
+            </Text>
+            <Ionicons
+              size={22}
+              name="add-circle-outline"
+              color={theme.colors.onBackground}
+            />
+          </TouchableOpacity>
+        </>
+      ) : (
+        <>
+          <Text
+            style={{
               color: theme.colors.onBackground,
               fontFamily: fontTitle,
-            },
-          ]}
-        >
-          Foyer
-        </Text>
-      </View>
+              fontSize: 16,
+              marginBottom: 10,
+            }}
+          >
+            Créer un foyer
+          </Text>
 
-      <View style={styles.headerList}>
-        <Text
-          style={{
-            color: theme.colors.onBackground,
-            fontFamily: fontTitle,
-            fontSize: 16,
-          }}
-        >
-          Membres
-        </Text>
-      </View>
+          <TextInput
+            placeholder="Nom du foyer"
+            placeholderTextColor="#888"
+            value={foyerName}
+            onChangeText={setFoyerName}
+            style={[
+              {
+                backgroundColor: theme.colors.surface,
+                color: theme.colors.onSurface,
+                fontFamily: fontBody,
+              },
+            ]}
+          />
 
-      <FlatList<Member>
-        data={data}
-        keyExtractor={(item) => item.memberId}
-        renderItem={renderItem}
-        ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-      />
-
-      <TouchableOpacity
-        style={[styles.bottomButton, { backgroundColor: theme.colors.primary }]}
-      >
-        <Text
-          style={{
-            color: theme.colors.onBackground,
-            fontFamily: fontButton,
-            fontSize: 14,
-          }}
-        >
-          Add
-        </Text>
-        <Ionicons
-          size={22}
-          name="add-circle-outline"
-          color={theme.colors.onBackground}
-        />
-      </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.bottomButton,
+              { backgroundColor: theme.colors.primary },
+            ]}
+            onPress={() => createFoyer(foyerName)}
+          >
+            <Text
+              style={{
+                color: theme.colors.onBackground,
+                fontFamily: fontButton,
+                fontSize: 14,
+              }}
+            >
+              Créer
+            </Text>
+          </TouchableOpacity>
+        </>
+      )}
     </View>
   );
 }

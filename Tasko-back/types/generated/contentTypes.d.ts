@@ -393,6 +393,7 @@ export interface ApiFoyerFoyer extends Struct.CollectionTypeSchema {
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::foyer.foyer'> &
       Schema.Attribute.Private;
+    members: Schema.Attribute.Relation<'oneToMany', 'api::member.member'>;
     publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -420,8 +421,9 @@ export interface ApiMemberMember extends Struct.CollectionTypeSchema {
       'api::member.member'
     > &
       Schema.Attribute.Private;
-    memberFoyer: Schema.Attribute.Relation<'oneToOne', 'api::foyer.foyer'>;
+    memberFoyer: Schema.Attribute.Relation<'manyToOne', 'api::foyer.foyer'>;
     memberPoints: Schema.Attribute.BigInteger;
+    memberUsername: Schema.Attribute.String;
     memberXP: Schema.Attribute.BigInteger;
     publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
