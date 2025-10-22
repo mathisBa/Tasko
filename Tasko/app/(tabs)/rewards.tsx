@@ -9,9 +9,11 @@ import {
   Platform,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import React, { useState, useCallback } from "react";
+import React, {useState, useCallback, useContext, useEffect} from "react";
 import { useTheme } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
+import StateContext from "@/app/StateContext";
+const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 type Member = {
   memberId: string;
@@ -28,34 +30,6 @@ type Reward = {
   rewardImage: string;
 };
 
-const members: Member[] = [
-  {
-    memberId: "memberId124",
-    memberUsername: "Benoit saint denis",
-    memberXP: 720,
-    memberPoints: 30,
-  },
-  {
-    memberId: "memberId123",
-    memberUsername: "Ethan Carter",
-    memberXP: 750,
-    memberPoints: 300,
-  },
-  {
-    memberId: "memberId125",
-    memberUsername: "Miley Cirus",
-    memberXP: 50,
-    memberPoints: 1,
-  },
-];
-
-const user: Member = {
-  memberId: "memberId124",
-  memberUsername: "Benoit saint denis",
-  memberXP: 720,
-  memberPoints: 200,
-};
-
 const rewards: Reward[] = [
   {
     rewardID: "1",
@@ -64,7 +38,7 @@ const rewards: Reward[] = [
     rewardDescription:
       "Vous avez la possibilité d'envoyer une notification à la personne de votre choix",
     rewardImage:
-      "https://www.actu-juridique.fr/app/uploads/2023/10/AdobeStock_414232987-scaled.jpeg",
+      "https://www.shutterstock.com/shutterstock/photos/2227267765/display_1500/stock-photo-man-making-fun-of-something-laughing-and-pointing-2227267765.jpg",
   },
   {
     rewardID: "2",
@@ -73,7 +47,7 @@ const rewards: Reward[] = [
     rewardDescription:
       "Vous avez la possibilité d'envoyer une notification à la personne de votre choix",
     rewardImage:
-      "https://www.actu-juridique.fr/app/uploads/2023/10/AdobeStock_414232987-scaled.jpeg",
+      "https://media.istockphoto.com/id/638219322/fr/photo/cest-lui-qui-apporte-de-lhumour-%C3%A0-l%C3%A9quipe.jpg?s=612x612&w=0&k=20&c=cOHtXAlwb40AT_wusJRED1M8k9J3DQbl6WdBLMkO2-w=",
   },
   {
     rewardID: "3",
@@ -82,7 +56,7 @@ const rewards: Reward[] = [
     rewardDescription:
       "Vous avez la possibilité d'envoyer une notification à la personne de votre choix",
     rewardImage:
-      "https://www.actu-juridique.fr/app/uploads/2023/10/AdobeStock_414232987-scaled.jpeg",
+      "https://media.istockphoto.com/id/1496943731/fr/photo/jeune-belle-femme-aux-cheveux-roux-caucasiens-riant-%C3%A0-la-cam%C3%A9ra-portrait-fond-vert.jpg?s=612x612&w=0&k=20&c=9V_v3TLReC_gJ6dNfagaV6NRUPS-6RH9d4zxln2UdTs=",
   },
   {
     rewardID: "4",
@@ -91,15 +65,62 @@ const rewards: Reward[] = [
     rewardDescription:
       "Vous avez la possibilité d'envoyer une notification à la personne de votre choix",
     rewardImage:
-      "https://www.actu-juridique.fr/app/uploads/2023/10/AdobeStock_414232987-scaled.jpeg",
+      "https://img.freepik.com/photos-gratuite/jeune-femme-afro-americaine-portant-salopettes_273609-10360.jpg?semt=ais_hybrid&w=740&q=80",
   },
 ];
 
 export default function Recompenses() {
+  const [members, setMembers] = useState<Member[]>([]);
+  const [currentMember, setCurrentMember] = useState<Member>({
+    memberId: "NOID",
+    memberUsername: "Pas connecté",
+    memberXP: 0,
+    memberPoints: 0,
+  });
+  const { foyerId } = useContext(StateContext);
+  const { userId, userDocId } = useContext(StateContext);
   const theme = useTheme();
   const fontBody = theme.fonts.bodyMedium.fontFamily;
   const fontButton = theme.fonts.labelMedium.fontFamily;
   const fontTitle = theme.fonts.titleMedium.fontFamily;
+  useEffect(() => {
+    const fetchFoyerMembers = async () => {
+      if (foyerId) {
+        try {
+          const response = await fetch(
+              `${apiUrl}/api/foyers/${foyerId}?populate=members`
+          );
+          const responseData = await response.json();
+          if (responseData.data) {
+            const fetchedFoyer = responseData.data;
+            if (fetchedFoyer.members) {
+              const members: Member[] = [];
+                fetchedFoyer.members.forEach((memberData: any) => {
+                    const member: Member = {
+                      memberId: memberData.id,
+                      memberUsername: memberData.memberUsername,
+                      memberXP: memberData.memberXP,
+                      memberPoints: memberData.memberPoints,
+                    }
+                    if (memberData.documentId === userDocId) {
+                        setCurrentMember(member);
+                    } else {
+                      members.push(member);
+                    }
+                })
+              setMembers(members);
+            } else {
+              setMembers([]);
+            }
+          }
+        } catch (error) {
+          console.error("Failed to fetch foyer:", error);
+        }
+      }
+    };
+    fetchFoyerMembers();
+  }, [foyerId, userDocId, userId]);
+
 
   const cleanHex = (color: string) => color.replace("#", "").substring(0, 6);
 
@@ -120,8 +141,8 @@ export default function Recompenses() {
 
   const renderItem: ListRenderItem<Reward> = ({ item }) => {
     const targetId = targets[item.rewardID] ?? "";
-    const enough = user.memberPoints >= item.rewardCost;
-    const missing = Math.max(0, item.rewardCost - user.memberPoints);
+    const enough = currentMember.memberPoints >= item.rewardCost;
+    const missing = Math.max(0, item.rewardCost - currentMember.memberPoints);
     const canClaim = enough && !!targetId;
 
     return (
@@ -255,7 +276,7 @@ export default function Recompenses() {
           style={styles.avatar}
           source={{
             uri: `https://ui-avatars.com/api/?name=${encodeURIComponent(
-              user.memberUsername || "Membre"
+              currentMember.memberUsername || "Membre"
             )}&background=${cleanHex(theme.colors.primary)}&color=ffffff`,
           }}
         />
@@ -265,9 +286,12 @@ export default function Recompenses() {
               color: theme.colors.onSurface,
               fontFamily: fontButton,
               fontSize: 16,
+              alignItems: "center",
+              justifyContent: "center",
+              textAlign: "center",
             }}
           >
-            {user.memberUsername}
+            {currentMember.memberUsername}
           </Text>
           <View style={styles.pointsRow}>
             <Ionicons
@@ -282,7 +306,7 @@ export default function Recompenses() {
                 fontSize: 16,
               }}
             >
-              {user.memberPoints} points
+              {currentMember.memberPoints} points
             </Text>
           </View>
         </View>
