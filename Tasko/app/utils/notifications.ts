@@ -11,7 +11,6 @@ export async function requestPermissionsAsync() {
       finalStatus = status;
     }
     if (finalStatus !== "granted") {
-      console.error("Failed to get push token for push notification!");
       return false;
     }
     if (Platform.OS === "android") {
