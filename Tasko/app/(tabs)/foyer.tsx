@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -13,54 +13,66 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import { StateContext } from "@/app/StateContext";
 
+const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+
 type Member = {
-  memberId: string;
-  memberUsername: string;
-  memberXP: number;
-  memberPoints: number;
+  id: string;
+  username: string;
+  xp: number;
+  points: number;
 };
 
-const members: Member[] = [
-  {
-    memberId: "memberId124",
-    memberUsername: "Benoit saint denis",
-    memberXP: 720,
-    memberPoints: 30,
-  },
-  {
-    memberId: "memberId123",
-    memberUsername: "Ethan Carter",
-    memberXP: 750,
-    memberPoints: 300,
-  },
-  {
-    memberId: "memberId125",
-    memberUsername: "Miley Cirus",
-    memberXP: 50,
-    memberPoints: 1,
-  },
-];
-
-const data: Member[] = [...members].sort((a, b) => b.memberXP - a.memberXP);
-const foyerOwnerID = "memberId125";
-const user: Member = {
-  memberId: "memberId124",
-  memberUsername: "Benoit saint denis",
-  memberXP: 720,
-  memberPoints: 30,
+type Foyer = {
+  id: string;
+  owner: string;
+  members: Member[];
 };
 
 export default function Foyer() {
   const router = useRouter();
   const { userId, setUserId } = useContext(StateContext);
+  const [foyer, setFoyer] = useState<Foyer | null>(null);
+  const [members, setMembers] = useState<Member[]>([]);
 
   useFocusEffect(
     React.useCallback(() => {
       if (!userId) {
         router.replace("/auth");
       }
-    }, [])
+    }, [userId])
   );
+
+  useEffect(() => {
+    const fetchFoyer = async () => {
+      if (userId) {
+        try {
+          const response = await fetch(
+            `${apiUrl}/api/members?filters[userId][$eq]=5`
+          );
+          const responseData = await response.json();
+          if (responseData.data.length > 0) {
+            const fetchedFoyer = responseData.data[0];
+            console.log(fetchedFoyer.memberFoyer);
+            if (fetchedFoyer.memberFoyer) {
+              setFoyer(fetchedFoyer.attributes);
+              setMembers(
+                fetchedFoyer.attributes.members.data.map((member: any) => ({
+                  id: member.id,
+                  ...member.attributes,
+                }))
+              );
+            } else {
+              console.log("Create foyer");
+            }
+          }
+        } catch (error) {
+          console.error("Failed to fetch or create foyer:", error);
+        }
+      }
+    };
+
+    fetchFoyer();
+  }, [userId]);
 
   const theme = useTheme();
   const fontBody = theme.fonts.bodyMedium.fontFamily;
@@ -88,7 +100,7 @@ export default function Foyer() {
           style={styles.avatar}
           source={{
             uri: `https://ui-avatars.com/api/?name=${encodeURIComponent(
-              item.memberUsername || "Membre"
+              item.username || "Membre"
             )}&background=${cleanHex(theme.colors.primary)}&color=ffffff`,
           }}
         />
@@ -101,8 +113,7 @@ export default function Foyer() {
               fontSize: 16,
             }}
           >
-            {item.memberUsername}{" "}
-            {item.memberId === user.memberId ? "(Vous)" : ""}
+            {item.username} {item.id === userId ? "(Vous)" : ""}
           </Text>
           <Text
             style={{
@@ -110,7 +121,7 @@ export default function Foyer() {
               fontFamily: fontBody,
             }}
           >
-            {item.memberId === foyerOwnerID ? "Propriétaire" : "Membre"}
+            {foyer && item.id === foyer.owner ? "Propriétaire" : "Membre"}
           </Text>
         </View>
       </View>
@@ -151,8 +162,8 @@ export default function Foyer() {
       </View>
 
       <FlatList<Member>
-        data={data}
-        keyExtractor={(item) => item.memberId}
+        data={members.sort((a, b) => b.xp - a.xp)}
+        keyExtractor={(item) => item.id}
         renderItem={renderItem}
         ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
       />
