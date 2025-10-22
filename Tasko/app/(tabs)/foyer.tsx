@@ -398,6 +398,8 @@ export default function Foyer() {
               color: theme.colors.onBackground,
               fontFamily: fontTitle,
               fontSize: 16,
+              marginTop: 10,
+              marginBottom: 16,
             }}
           >
             Créer un foyer
@@ -408,8 +410,8 @@ export default function Foyer() {
             style={[
               {
                 backgroundColor: theme.colors.surface,
-                color: theme.colors.onSurface,
-                fontFamily: fontBody,
+                color: theme.colors.onBackground,
+                fontFamily: fontButton,
                 padding: 10,
                 width: "100%",
                 borderRadius: 5,
@@ -426,7 +428,10 @@ export default function Foyer() {
             onPress={() => createFoyer(foyerName)}
           >
             <Text
-              style={{ color: theme.colors.onPrimary, fontFamily: fontButton }}
+              style={{
+                color: theme.colors.onBackground,
+                fontFamily: fontButton,
+              }}
             >
               Créer
             </Text>
@@ -437,7 +442,8 @@ export default function Foyer() {
               color: theme.colors.onBackground,
               fontFamily: fontTitle,
               fontSize: 16,
-              marginTop: 20,
+              marginTop: 30,
+              marginBottom: 16,
             }}
           >
             Rejoindre un foyer
@@ -448,8 +454,8 @@ export default function Foyer() {
             style={[
               {
                 backgroundColor: theme.colors.surface,
-                color: theme.colors.onSurface,
-                fontFamily: fontBody,
+                color: theme.colors.onBackground,
+                fontFamily: fontButton,
                 padding: 10,
                 width: "100%",
                 borderRadius: 5,
@@ -466,7 +472,10 @@ export default function Foyer() {
             onPress={() => joinFoyer(foyerUID)}
           >
             <Text
-              style={{ color: theme.colors.onPrimary, fontFamily: fontButton }}
+              style={{
+                color: theme.colors.onBackground,
+                fontFamily: fontButton,
+              }}
             >
               Rejoindre
             </Text>
@@ -516,7 +525,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   bottomButton: {
-    marginTop: 10,
+    marginTop: 12,
     padding: 12,
     borderRadius: 8,
     alignItems: "center",
