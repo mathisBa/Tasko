@@ -20,6 +20,7 @@ const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 type Member = {
   id: string;
+  docId: string;
   username: string;
   xp: number;
   points: number;
@@ -47,6 +48,36 @@ export default function Foyer() {
     if (foyerId) {
       await Clipboard.setStringAsync(foyerId);
       setShowJoinCodeModal(true);
+    }
+  };
+
+  const removeMemberFromFoyer = async (memberDocId: string) => {
+    try {
+      const res = await fetch(`${apiUrl}/api/members/${memberDocId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          data: {
+            memberFoyer: null,
+          },
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        console.error("Erreur suppression du foyer :", data);
+        alert("Échec de la suppression du foyer pour ce membre.");
+        return;
+      }
+
+      console.log("Membre détaché du foyer :", data);
+      alert("Membre retiré du foyer avec succès.");
+
+      router.replace("/foyer");
+    } catch (error) {
+      console.error("Erreur réseau ou inattendue :", error);
+      alert("Une erreur est survenue lors du retrait du membre.");
     }
   };
 
@@ -106,6 +137,7 @@ export default function Foyer() {
               const members: Member[] = fetchedFoyer.members.map(
                 (item: any) => ({
                   id: item.userId,
+                  docId: item.documentId,
                   username: item.memberUsername,
                   xp: item.memberXP,
                   points: item.memberPoints,
@@ -130,6 +162,28 @@ export default function Foyer() {
   const fontTitle = theme.fonts.titleMedium.fontFamily;
 
   const cleanHex = (color: string) => color.replace("#", "").substring(0, 6);
+
+  const joinFoyer = async (foyerUID: string) => {
+    if (!foyerUID.trim()) {
+      alert("Le nom du foyer est obligatoire.");
+      return;
+    }
+    try {
+      const addFoyerUser = await fetch(`${apiUrl}/api/members/${userDocId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          data: {
+            memberFoyer: foyerUID,
+          },
+        }),
+      });
+      setFoyerId(foyerUID);
+    } catch (error) {
+      console.error("Erreur createFoyer :", error);
+      alert("Une erreur est survenue.");
+    }
+  };
 
   const createFoyer = async (foyerName: string) => {
     if (!foyerName.trim()) {
@@ -175,28 +229,6 @@ export default function Foyer() {
     }
   };
 
-  const joinFoyer = async (foyerUID: string) => {
-    if (!foyerUID.trim()) {
-      alert("Le nom du foyer est obligatoire.");
-      return;
-    }
-    try {
-      const addFoyerUser = await fetch(`${apiUrl}/api/members/${userDocId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          data: {
-            memberFoyer: foyerUID,
-          },
-        }),
-      });
-      setFoyerId(foyerUID);
-    } catch (error) {
-      console.error("Erreur createFoyer :", error);
-      alert("Une erreur est survenue.");
-    }
-  };
-
   const renderItem: ListRenderItem<Member> = ({ item, index }) => (
     <View style={[styles.rowMember, { backgroundColor: theme.colors.surface }]}>
       <View style={styles.rowProfile}>
@@ -231,8 +263,21 @@ export default function Foyer() {
           </Text>
         </View>
       </View>
-      <TouchableOpacity>
-        <Ionicons size={22} name="trash-outline" color={theme.colors.primary} />
+      <TouchableOpacity
+        disabled={!(foyer && userId === foyer.owner && item.id != foyer.owner)}
+        onPress={() => {
+          if (foyer && userId === foyer.owner) {
+            removeMemberFromFoyer(item.docId);
+          }
+        }}
+      >
+        <Ionicons
+          size={22}
+          name={
+            foyer && userId === foyer.owner ? "trash-outline" : "person-outline"
+          }
+          color={theme.colors.primary}
+        />
       </TouchableOpacity>
     </View>
   );
