@@ -50,19 +50,15 @@ export default function Foyer() {
       if (userId) {
         try {
           const response = await fetch(
-            `${apiUrl}/api/members?filters[userId][$eq]=` + userId
+            `${apiUrl}/api/members?filters[userId][$eq]=` +
+              userId +
+              "&populate=memberFoyer"
           );
           const responseData = await response.json();
           if (responseData.data.length > 0) {
             const fetchedFoyer = responseData.data[0];
             if (fetchedFoyer.memberFoyer) {
-              setFoyer(fetchedFoyer.attributes);
-              setMembers(
-                fetchedFoyer.attributes.members.data.map((member: any) => ({
-                  id: member.id,
-                  ...member.attributes,
-                }))
-              );
+              setFoyer(fetchedFoyer.memberFoyer);
             } else {
               setFoyer(null);
             }
@@ -110,9 +106,6 @@ export default function Foyer() {
       }
 
       const foyerId = foyerData.data.documentId;
-      console.log("Foyer créé :", foyerData.data);
-
-      console.log(userDocId);
 
       const addFoyerUser = await fetch(`${apiUrl}/api/members/${userDocId}`, {
         method: "PUT",
