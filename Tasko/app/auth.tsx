@@ -25,6 +25,7 @@ export default function AuthScreen() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const { userId, setUserId } = useContext(StateContext);
+  const { userDocId, setUserDocId } = useContext(StateContext);
 
   const handleSubmit = () => {
     let data = {
@@ -46,8 +47,20 @@ export default function AuthScreen() {
           const data = await response.json();
           console.log("User profile", data.user);
           console.log("User token", data.jwt);
-          setUserId(data.user.id);
-          router.replace("/foyer");
+          try {
+            const response = await fetch(
+              `${apiUrl}/api/members?filters[userId][$eq]=` + data.user.id
+            );
+            const responseData = await response.json();
+            if (responseData.data.length > 0) {
+              const fetchedMember = responseData.data[0];
+              setUserDocId(fetchedMember.documentId);
+              setUserId(data.user.id);
+              router.replace("/foyer");
+            }
+          } catch (error) {
+            console.error("Failed to fetch or create foyer:", error);
+          }
         })
         .catch((error) => {
           console.log("An error occurred:", error);
@@ -81,6 +94,7 @@ export default function AuthScreen() {
                 if (response.ok) {
                   setIsLogin(true);
                   setUserId(responseData.user.id);
+                  setUserDocId(responseData.user.documentId);
                 } else {
                   console.log("Response member pas ok : ", response.status);
                 }

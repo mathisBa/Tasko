@@ -32,6 +32,7 @@ type Foyer = {
 export default function Foyer() {
   const router = useRouter();
   const { userId, setUserId } = useContext(StateContext);
+  const { userDocId, setUserDocId } = useContext(StateContext);
   const [foyer, setFoyer] = useState<Foyer | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
   const [foyerName, setFoyerName] = useState("");
@@ -49,7 +50,7 @@ export default function Foyer() {
       if (userId) {
         try {
           const response = await fetch(
-            `${apiUrl}/api/members?filters[userId][$eq]=5`
+            `${apiUrl}/api/members?filters[userId][$eq]=` + userId
           );
           const responseData = await response.json();
           if (responseData.data.length > 0) {
@@ -89,28 +90,39 @@ export default function Foyer() {
     }
 
     try {
-      // 1. Création du foyer
       const foyerRes = await fetch(`${apiUrl}/api/foyers`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           data: {
-            name: foyerName.trim(),
-            owner: userId,
+            foyerName: foyerName.trim(),
+            foyerOwner: userId,
           },
         }),
       });
 
       const foyerData = await foyerRes.json();
 
-      if (!foyerRes.ok || !foyerData.data) {
+      if (!foyerRes.ok || !foyerData.data || !foyerData.data.id) {
         console.error("Erreur création foyer :", foyerData);
         alert("Échec de la création du foyer.");
         return;
       }
 
-      const foyerId = foyerData.data.id;
+      const foyerId = foyerData.data.documentId;
       console.log("Foyer créé :", foyerData.data);
+
+      console.log(userDocId);
+
+      const addFoyerUser = await fetch(`${apiUrl}/api/members/${userDocId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          data: {
+            memberFoyer: foyerId,
+          },
+        }),
+      });
     } catch (error) {
       console.error("Erreur createFoyer :", error);
       alert("Une erreur est survenue.");
@@ -244,7 +256,7 @@ export default function Foyer() {
               styles.bottomButton,
               { backgroundColor: theme.colors.primary },
             ]}
-            onPress={() => console.log(foyerName)}
+            onPress={() => createFoyer(foyerName)}
           >
             <Text
               style={{
