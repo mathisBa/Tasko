@@ -53,14 +53,18 @@ export default function Foyer() {
           const response = await fetch(
             `${apiUrl}/api/members?filters[userId][$eq]=` +
               userId +
-              "&populate=memberFoyer"
+              "&populate[memberFoyer][populate]=foyerOwner"
           );
           const responseData = await response.json();
           if (responseData.data.length > 0) {
             const fetchedFoyer = responseData.data[0];
             if (fetchedFoyer.memberFoyer) {
               setFoyerId(fetchedFoyer.memberFoyer.documentId);
-              setFoyer(fetchedFoyer.memberFoyer);
+              setFoyer({
+                id: fetchedFoyer.memberFoyer.documentId,
+                owner: fetchedFoyer.memberFoyer.foyerOwner.userId,
+                members: [],
+              });
             } else {
               setFoyerId(null);
               setFoyer(null);
