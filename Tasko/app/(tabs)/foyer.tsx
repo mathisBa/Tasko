@@ -18,6 +18,7 @@ const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 type Member = {
   id: string;
+  docId: string;
   username: string;
   xp: number;
   points: number;
@@ -37,6 +38,36 @@ export default function Foyer() {
   const [foyer, setFoyer] = useState<Foyer | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
   const [foyerName, setFoyerName] = useState("");
+
+  const removeMemberFromFoyer = async (memberDocId: string) => {
+    try {
+      const res = await fetch(`${apiUrl}/api/members/${memberDocId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          data: {
+            memberFoyer: null,
+          },
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        console.error("Erreur suppression du foyer :", data);
+        alert("Échec de la suppression du foyer pour ce membre.");
+        return;
+      }
+
+      console.log("Membre détaché du foyer :", data);
+      alert("Membre retiré du foyer avec succès.");
+
+      router.replace("/foyer");
+    } catch (error) {
+      console.error("Erreur réseau ou inattendue :", error);
+      alert("Une erreur est survenue lors du retrait du membre.");
+    }
+  };
 
   useFocusEffect(
     React.useCallback(() => {
@@ -94,6 +125,7 @@ export default function Foyer() {
               const members: Member[] = fetchedFoyer.members.map(
                 (item: any) => ({
                   id: item.userId,
+                  docId: item.documentId,
                   username: item.memberUsername,
                   xp: item.memberXP,
                   points: item.memberPoints,
@@ -211,6 +243,7 @@ export default function Foyer() {
         disabled={!(foyer && userId === foyer.owner && item.id != foyer.owner)}
         onPress={() => {
           if (foyer && userId === foyer.owner) {
+            removeMemberFromFoyer(item.docId);
           }
         }}
       >
