@@ -13,6 +13,7 @@ import { useTheme } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import { StateContext } from "@/app/StateContext";
+import * as Clipboard from "expo-clipboard";
 
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
@@ -37,6 +38,14 @@ export default function Foyer() {
   const [foyer, setFoyer] = useState<Foyer | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
   const [foyerName, setFoyerName] = useState("");
+  const [showJoinCode, setShowJoinCode] = useState(false);
+
+  const copyFoyerId = async () => {
+    if (foyerId) {
+      await Clipboard.setStringAsync(foyerId);
+      setShowJoinCode(true);
+    }
+  };
 
   useFocusEffect(
     React.useCallback(() => {
@@ -241,6 +250,7 @@ export default function Foyer() {
               styles.bottomButton,
               { backgroundColor: theme.colors.primary },
             ]}
+            onPress={() => copyFoyerId()}
           >
             <Text
               style={{
@@ -257,6 +267,22 @@ export default function Foyer() {
               color={theme.colors.onBackground}
             />
           </TouchableOpacity>
+
+          {showJoinCode && foyerId && (
+            <View style={{ marginTop: 20 }}>
+              <Text
+                style={{
+                  color: "red",
+                  fontFamily: fontBody,
+                  fontSize: 16,
+                  textAlign: "center",
+                  marginBottom: 200,
+                }}
+              >
+                Donnez ce code pour rejoindre le foyer : {foyerId}
+              </Text>
+            </View>
+          )}
         </>
       ) : (
         <>
@@ -369,5 +395,6 @@ const styles = StyleSheet.create({
     width: "100%",
     padding: 10,
     borderRadius: 5,
+    marginBottom: 200,
   },
 });
