@@ -7,6 +7,7 @@ import {
   FlatList,
   ListRenderItem,
   StyleSheet,
+  TextInput,
 } from "react-native";
 import { useTheme } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
@@ -33,6 +34,7 @@ export default function Foyer() {
   const { userId, setUserId } = useContext(StateContext);
   const [foyer, setFoyer] = useState<Foyer | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
+  const [foyerName, setFoyerName] = useState("");
 
   useFocusEffect(
     React.useCallback(() => {
@@ -52,7 +54,6 @@ export default function Foyer() {
           const responseData = await response.json();
           if (responseData.data.length > 0) {
             const fetchedFoyer = responseData.data[0];
-            console.log(fetchedFoyer.memberFoyer);
             if (fetchedFoyer.memberFoyer) {
               setFoyer(fetchedFoyer.attributes);
               setMembers(
@@ -62,7 +63,7 @@ export default function Foyer() {
                 }))
               );
             } else {
-              console.log("Create foyer");
+              setFoyer(null);
             }
           }
         } catch (error) {
@@ -80,6 +81,41 @@ export default function Foyer() {
   const fontTitle = theme.fonts.titleMedium.fontFamily;
 
   const cleanHex = (color: string) => color.replace("#", "").substring(0, 6);
+
+  const createFoyer = async (foyerName: string) => {
+    if (!foyerName.trim()) {
+      alert("Le nom du foyer est obligatoire.");
+      return;
+    }
+
+    try {
+      // 1. Création du foyer
+      const foyerRes = await fetch(`${apiUrl}/api/foyers`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          data: {
+            name: foyerName.trim(),
+            owner: userId,
+          },
+        }),
+      });
+
+      const foyerData = await foyerRes.json();
+
+      if (!foyerRes.ok || !foyerData.data) {
+        console.error("Erreur création foyer :", foyerData);
+        alert("Échec de la création du foyer.");
+        return;
+      }
+
+      const foyerId = foyerData.data.id;
+      console.log("Foyer créé :", foyerData.data);
+    } catch (error) {
+      console.error("Erreur createFoyer :", error);
+      alert("Une erreur est survenue.");
+    }
+  };
 
   const renderItem: ListRenderItem<Member> = ({ item, index }) => (
     <View style={[styles.rowMember, { backgroundColor: theme.colors.surface }]}>
@@ -132,60 +168,96 @@ export default function Foyer() {
   );
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-    >
-      <View style={styles.header}>
-        <Text
-          style={[
-            styles.title,
-            {
+    <View style={styles.container}>
+      {foyer ? (
+        <>
+          <View style={styles.headerList}>
+            <Text
+              style={{
+                color: theme.colors.onBackground,
+                fontFamily: fontTitle,
+                fontSize: 16,
+              }}
+            >
+              Membres
+            </Text>
+          </View>
+
+          <FlatList
+            data={members.sort((a, b) => b.xp - a.xp)}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={renderItem}
+            ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+          />
+
+          <TouchableOpacity
+            style={[
+              styles.bottomButton,
+              { backgroundColor: theme.colors.primary },
+            ]}
+          >
+            <Text
+              style={{
+                color: theme.colors.onBackground,
+                fontFamily: fontButton,
+                fontSize: 14,
+              }}
+            >
+              Add
+            </Text>
+            <Ionicons
+              size={22}
+              name="add-circle-outline"
+              color={theme.colors.onBackground}
+            />
+          </TouchableOpacity>
+        </>
+      ) : (
+        <>
+          <Text
+            style={{
               color: theme.colors.onBackground,
               fontFamily: fontTitle,
-            },
-          ]}
-        >
-          Foyer
-        </Text>
-      </View>
+              fontSize: 16,
+              marginBottom: 10,
+            }}
+          >
+            Créer un foyer
+          </Text>
 
-      <View style={styles.headerList}>
-        <Text
-          style={{
-            color: theme.colors.onBackground,
-            fontFamily: fontTitle,
-            fontSize: 16,
-          }}
-        >
-          Membres
-        </Text>
-      </View>
+          <TextInput
+            placeholder="Nom du foyer"
+            placeholderTextColor="#888"
+            value={foyerName}
+            onChangeText={setFoyerName}
+            style={[
+              {
+                backgroundColor: theme.colors.surface,
+                color: theme.colors.onSurface,
+                fontFamily: fontBody,
+              },
+            ]}
+          />
 
-      <FlatList<Member>
-        data={members.sort((a, b) => b.xp - a.xp)}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-      />
-
-      <TouchableOpacity
-        style={[styles.bottomButton, { backgroundColor: theme.colors.primary }]}
-      >
-        <Text
-          style={{
-            color: theme.colors.onBackground,
-            fontFamily: fontButton,
-            fontSize: 14,
-          }}
-        >
-          Add
-        </Text>
-        <Ionicons
-          size={22}
-          name="add-circle-outline"
-          color={theme.colors.onBackground}
-        />
-      </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.bottomButton,
+              { backgroundColor: theme.colors.primary },
+            ]}
+            onPress={() => console.log(foyerName)}
+          >
+            <Text
+              style={{
+                color: theme.colors.onBackground,
+                fontFamily: fontButton,
+                fontSize: 14,
+              }}
+            >
+              Créer
+            </Text>
+          </TouchableOpacity>
+        </>
+      )}
     </View>
   );
 }
