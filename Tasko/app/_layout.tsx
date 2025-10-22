@@ -102,6 +102,7 @@ const customDarkTheme = {
 export default function RootLayout() {
   const [userId, setUserId] = useState<string | null>(null);
   const [userDocId, setUserDocId] = useState<string | null>(null);
+  const [foyerId, setFoyerId] = useState<string | null>(null);
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
 
@@ -120,7 +121,14 @@ export default function RootLayout() {
 
   return (
     <StateContext.Provider
-      value={{ userId, setUserId, userDocId, setUserDocId }}
+      value={{
+        userId,
+        setUserId,
+        userDocId,
+        setUserDocId,
+        foyerId,
+        setFoyerId,
+      }}
     >
       <PaperProvider theme={theme}>
         <View

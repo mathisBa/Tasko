@@ -5,6 +5,8 @@ interface StateContextType {
   setUserId: Dispatch<SetStateAction<string | null>>;
   userDocId: string | null;
   setUserDocId: Dispatch<SetStateAction<string | null>>;
+  foyerId: string | null;
+  setFoyerId: Dispatch<SetStateAction<string | null>>;
 }
 
 export const StateContext = createContext<StateContextType>({
@@ -12,6 +14,8 @@ export const StateContext = createContext<StateContextType>({
   setUserId: () => {},
   userDocId: null,
   setUserDocId: () => {},
+  foyerId: null,
+  setFoyerId: () => {},
 });
 
 export default StateContext;

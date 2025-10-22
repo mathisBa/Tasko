@@ -11,11 +11,6 @@
   },
   "pluginOptions": {},
   "attributes": {
-    "memberFoyer": {
-      "type": "relation",
-      "relation": "oneToOne",
-      "target": "api::foyer.foyer"
-    },
     "memberXP": {
       "type": "biginteger"
     },
@@ -24,6 +19,12 @@
     },
     "userId": {
       "type": "integer"
+    },
+    "memberFoyer": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::foyer.foyer",
+      "inversedBy": "members"
     }
   }
 }

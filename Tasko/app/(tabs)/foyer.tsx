@@ -33,6 +33,7 @@ export default function Foyer() {
   const router = useRouter();
   const { userId, setUserId } = useContext(StateContext);
   const { userDocId, setUserDocId } = useContext(StateContext);
+  const { foyerId, setFoyerId } = useContext(StateContext);
   const [foyer, setFoyer] = useState<Foyer | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
   const [foyerName, setFoyerName] = useState("");
@@ -58,8 +59,10 @@ export default function Foyer() {
           if (responseData.data.length > 0) {
             const fetchedFoyer = responseData.data[0];
             if (fetchedFoyer.memberFoyer) {
+              setFoyerId(fetchedFoyer.memberFoyer.id);
               setFoyer(fetchedFoyer.memberFoyer);
             } else {
+              setFoyerId(null);
               setFoyer(null);
             }
           }
@@ -174,7 +177,7 @@ export default function Foyer() {
 
   return (
     <View style={styles.container}>
-      {foyer ? (
+      {foyerId ? (
         <>
           <View style={styles.headerList}>
             <Text
