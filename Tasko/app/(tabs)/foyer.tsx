@@ -8,6 +8,7 @@ import {
   ListRenderItem,
   StyleSheet,
   TextInput,
+  Modal,
 } from "react-native";
 import { useTheme } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
@@ -40,12 +41,13 @@ export default function Foyer() {
   const [members, setMembers] = useState<Member[]>([]);
   const [foyerName, setFoyerName] = useState("");
   const [foyerUID, setFoyerUID] = useState("");
-  const [showJoinCode, setShowJoinCode] = useState(false);
+
+  const [showJoinCodeModal, setShowJoinCodeModal] = useState(false);
 
   const copyFoyerId = async () => {
     if (foyerId) {
       await Clipboard.setStringAsync(foyerId);
-      setShowJoinCode(true);
+      setShowJoinCodeModal(true);
     }
   };
 
@@ -233,15 +235,11 @@ export default function Foyer() {
         <Text
           style={[
             styles.number,
-            {
-              color: theme.colors.onSurface,
-              fontFamily: fontBody,
-            },
+            { color: theme.colors.onSurface, fontFamily: fontBody },
           ]}
         >
           {index + 1}
         </Text>
-
         <Image
           style={styles.avatar}
           source={{
@@ -250,7 +248,6 @@ export default function Foyer() {
             )}&background=${cleanHex(theme.colors.primary)}&color=ffffff`,
           }}
         />
-
         <View>
           <Text
             style={{
@@ -261,13 +258,8 @@ export default function Foyer() {
           >
             {item.username} {item.id === userId ? "(Vous)" : ""}
           </Text>
-          <Text
-            style={{
-              color: theme.colors.onSurface,
-              fontFamily: fontBody,
-            }}
-          >
-            {foyer && item.id === foyer.owner ? "Propriétaire" : "Membre"}
+          <Text style={{ color: theme.colors.onSurface, fontFamily: fontBody }}>
+            Membre
           </Text>
         </View>
       </View>
@@ -291,66 +283,113 @@ export default function Foyer() {
   );
 
   return (
-    <View style={styles.container}>
-      {foyerId ? (
-        <>
-          <View style={styles.headerList}>
-            <Text
-              style={{
-                color: theme.colors.onBackground,
-                fontFamily: fontTitle,
-                fontSize: 16,
-              }}
-            >
-              Membres
-            </Text>
-          </View>
-
-          <FlatList
-            data={members.sort((a, b) => b.xp - a.xp)}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={renderItem}
-            ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-          />
-
-          <TouchableOpacity
+    <View
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
+      <Modal
+        visible={showJoinCodeModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowJoinCodeModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View
             style={[
-              styles.bottomButton,
-              { backgroundColor: theme.colors.primary },
+              styles.modalContainer,
+              { backgroundColor: theme.colors.surface },
             ]}
           >
             <Text
               style={{
-                color: theme.colors.onBackground,
-                fontFamily: fontButton,
-                fontSize: 14,
+                fontFamily: fontTitle,
+                fontSize: 18,
+                color: theme.colors.onSurface,
+                marginBottom: 20,
+                textAlign: "center",
               }}
-              onPress={() => copyFoyerId()}
             >
-              Add
+              Code du foyer
             </Text>
-            <Ionicons
-              size={22}
-              name="add-circle-outline"
-              color={theme.colors.onBackground}
-            />
-          </TouchableOpacity>
+            <Text
+              style={{
+                fontFamily: fontBody,
+                fontSize: 16,
+                color: theme.colors.onSurface,
+                textAlign: "center",
+                marginBottom: 6,
+              }}
+            >
+              Partage ce code à tes colocs :
+            </Text>
+            <Text
+              style={{
+                fontFamily: fontBody,
+                fontSize: 16,
+                color: theme.colors.onSurface,
+                textAlign: "center",
+                marginBottom: 20,
+              }}
+            >
+              {foyerId}
+            </Text>
 
-          {showJoinCode && foyerId && (
-            <View style={{ marginTop: 20 }}>
+            <TouchableOpacity
+              style={[
+                styles.modalButton,
+                { backgroundColor: theme.colors.primary },
+              ]}
+              onPress={async () => {
+                await Clipboard.setStringAsync(foyerId || "");
+                setShowJoinCodeModal(false);
+              }}
+            >
               <Text
                 style={{
-                  color: "red",
-                  fontFamily: fontBody,
-                  fontSize: 16,
-                  textAlign: "center",
-                  marginBottom: 200,
+                  color: theme.colors.onBackground,
+                  fontFamily: fontButton,
                 }}
               >
-                Donnez ce code pour rejoindre le foyer : {foyerId}
+                Copier
               </Text>
-            </View>
-          )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => setShowJoinCodeModal(false)}
+              style={styles.closeIcon}
+            >
+              <Ionicons name="close" size={24} color={theme.colors.onSurface} />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {foyerId ? (
+        <>
+          <View style={styles.header}>
+            <View style={{ width: 28 }} />
+            <Text
+              style={[
+                styles.title,
+                { color: theme.colors.onBackground, fontFamily: fontTitle },
+              ]}
+            >
+              Membres
+            </Text>
+            <TouchableOpacity onPress={copyFoyerId}>
+              <Ionicons
+                name="add"
+                size={28}
+                color={theme.colors.onBackground}
+              />
+            </TouchableOpacity>
+          </View>
+
+          <FlatList
+            data={members.sort((a, b) => b.xp - a.xp)}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+            ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+          />
         </>
       ) : (
         <>
@@ -359,26 +398,26 @@ export default function Foyer() {
               color: theme.colors.onBackground,
               fontFamily: fontTitle,
               fontSize: 16,
-              marginBottom: 10,
             }}
           >
             Créer un foyer
           </Text>
-
           <TextInput
             placeholder="Nom du foyer"
             placeholderTextColor="#888"
-            value={foyerName}
-            onChangeText={setFoyerName}
             style={[
               {
                 backgroundColor: theme.colors.surface,
                 color: theme.colors.onSurface,
                 fontFamily: fontBody,
+                padding: 10,
+                width: "100%",
+                borderRadius: 5,
               },
             ]}
+            value={foyerName}
+            onChangeText={setFoyerName}
           />
-
           <TouchableOpacity
             style={[
               styles.bottomButton,
@@ -387,11 +426,7 @@ export default function Foyer() {
             onPress={() => createFoyer(foyerName)}
           >
             <Text
-              style={{
-                color: theme.colors.onBackground,
-                fontFamily: fontButton,
-                fontSize: 14,
-              }}
+              style={{ color: theme.colors.onPrimary, fontFamily: fontButton }}
             >
               Créer
             </Text>
@@ -402,26 +437,27 @@ export default function Foyer() {
               color: theme.colors.onBackground,
               fontFamily: fontTitle,
               fontSize: 16,
-              marginBottom: 10,
+              marginTop: 20,
             }}
           >
             Rejoindre un foyer
           </Text>
-
           <TextInput
-            placeholder="Code unique du foyer"
+            placeholder="Code du foyer"
             placeholderTextColor="#888"
-            value={foyerUID}
-            onChangeText={setFoyerUID}
             style={[
               {
                 backgroundColor: theme.colors.surface,
                 color: theme.colors.onSurface,
                 fontFamily: fontBody,
+                padding: 10,
+                width: "100%",
+                borderRadius: 5,
               },
             ]}
+            value={foyerUID}
+            onChangeText={setFoyerUID}
           />
-
           <TouchableOpacity
             style={[
               styles.bottomButton,
@@ -430,11 +466,7 @@ export default function Foyer() {
             onPress={() => joinFoyer(foyerUID)}
           >
             <Text
-              style={{
-                color: theme.colors.onBackground,
-                fontFamily: fontButton,
-                fontSize: 14,
-              }}
+              style={{ color: theme.colors.onPrimary, fontFamily: fontButton }}
             >
               Rejoindre
             </Text>
@@ -447,37 +479,20 @@ export default function Foyer() {
 
 const styles = StyleSheet.create({
   container: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
     flex: 1,
     padding: 10,
   },
   header: {
-    display: "flex",
-    justifyContent: "center",
-    paddingTop: 10,
-    paddingBottom: 10,
-  },
-  headerList: {
-    display: "flex",
-    justifyContent: "flex-start",
-    textAlign: "left",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     width: "100%",
-    paddingTop: 10,
-    paddingBottom: 10,
+    paddingVertical: 10,
   },
   title: {
     fontSize: 20,
   },
-  avatar: {
-    width: 36,
-    aspectRatio: 1 / 1,
-    borderRadius: 5,
-  },
   rowMember: {
-    display: "flex",
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
@@ -487,24 +502,49 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   rowProfile: {
-    display: "flex",
     flexDirection: "row",
-    justifyContent: "center",
     alignItems: "center",
     gap: 10,
+  },
+  avatar: {
+    width: 36,
+    aspectRatio: 1,
+    borderRadius: 5,
   },
   number: {
     fontSize: 16,
     marginRight: 12,
   },
   bottomButton: {
-    display: "flex",
-    flexDirection: "row",
+    marginTop: 10,
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    width: "100%",
+  },
+  modalOverlay: {
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    gap: 5,
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContainer: {
+    width: "80%",
+    padding: 20,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  modalButton: {
     width: "100%",
-    padding: 10,
-    borderRadius: 5,
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 10,
+  },
+  closeIcon: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    padding: 5,
   },
 });
