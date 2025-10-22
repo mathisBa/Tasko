@@ -47,8 +47,6 @@ export default function TasksScreen() {
             return;
           }
 
-          console.log(tasksData.data[0].taskMember.memberUsername);
-
           const filteredTasks = tasksData.data.filter(
             (task: any) => task.taskStatus != "done"
           );
