@@ -82,6 +82,7 @@ export default function AuthScreen() {
               memberXP: 0,
               memberPoints: 0,
               userId: responseData.user.id,
+              memberUsername: username,
             };
             fetch(`${apiUrl}/api/members`, {
               method: "POST",

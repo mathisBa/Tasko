@@ -25,6 +25,9 @@
       "relation": "manyToOne",
       "target": "api::foyer.foyer",
       "inversedBy": "members"
+    },
+    "memberUsername": {
+      "type": "string"
     }
   }
 }

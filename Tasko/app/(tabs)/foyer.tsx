@@ -95,7 +95,7 @@ export default function Foyer() {
         body: JSON.stringify({
           data: {
             foyerName: foyerName.trim(),
-            foyerOwner: userId,
+            foyerOwner: userDocId,
           },
         }),
       });

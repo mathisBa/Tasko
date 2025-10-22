@@ -423,6 +423,7 @@ export interface ApiMemberMember extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     memberFoyer: Schema.Attribute.Relation<'manyToOne', 'api::foyer.foyer'>;
     memberPoints: Schema.Attribute.BigInteger;
+    memberUsername: Schema.Attribute.String;
     memberXP: Schema.Attribute.BigInteger;
     publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
