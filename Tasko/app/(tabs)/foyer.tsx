@@ -13,6 +13,7 @@ import { useTheme } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import { StateContext } from "@/app/StateContext";
+import * as Clipboard from "expo-clipboard";
 
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
@@ -37,6 +38,15 @@ export default function Foyer() {
   const [foyer, setFoyer] = useState<Foyer | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
   const [foyerName, setFoyerName] = useState("");
+  const [foyerUID, setFoyerUID] = useState("");
+  const [showJoinCode, setShowJoinCode] = useState(false);
+
+  const copyFoyerId = async () => {
+    if (foyerId) {
+      await Clipboard.setStringAsync(foyerId);
+      setShowJoinCode(true);
+    }
+  };
 
   useFocusEffect(
     React.useCallback(() => {
@@ -163,6 +173,28 @@ export default function Foyer() {
     }
   };
 
+  const joinFoyer = async (foyerUID: string) => {
+    if (!foyerUID.trim()) {
+      alert("Le nom du foyer est obligatoire.");
+      return;
+    }
+    try {
+      const addFoyerUser = await fetch(`${apiUrl}/api/members/${userDocId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          data: {
+            memberFoyer: foyerUID,
+          },
+        }),
+      });
+      setFoyerId(foyerUID);
+    } catch (error) {
+      console.error("Erreur createFoyer :", error);
+      alert("Une erreur est survenue.");
+    }
+  };
+
   const renderItem: ListRenderItem<Member> = ({ item, index }) => (
     <View style={[styles.rowMember, { backgroundColor: theme.colors.surface }]}>
       <View style={styles.rowProfile}>
@@ -241,6 +273,7 @@ export default function Foyer() {
               styles.bottomButton,
               { backgroundColor: theme.colors.primary },
             ]}
+            onPress={() => copyFoyerId()}
           >
             <Text
               style={{
@@ -257,6 +290,22 @@ export default function Foyer() {
               color={theme.colors.onBackground}
             />
           </TouchableOpacity>
+
+          {showJoinCode && foyerId && (
+            <View style={{ marginTop: 20 }}>
+              <Text
+                style={{
+                  color: "red",
+                  fontFamily: fontBody,
+                  fontSize: 16,
+                  textAlign: "center",
+                  marginBottom: 200,
+                }}
+              >
+                Donnez ce code pour rejoindre le foyer : {foyerId}
+              </Text>
+            </View>
+          )}
         </>
       ) : (
         <>
@@ -300,6 +349,49 @@ export default function Foyer() {
               }}
             >
               Créer
+            </Text>
+          </TouchableOpacity>
+
+          <Text
+            style={{
+              color: theme.colors.onBackground,
+              fontFamily: fontTitle,
+              fontSize: 16,
+              marginBottom: 10,
+            }}
+          >
+            Rejoindre un foyer
+          </Text>
+
+          <TextInput
+            placeholder="Code unique du foyer"
+            placeholderTextColor="#888"
+            value={foyerUID}
+            onChangeText={setFoyerUID}
+            style={[
+              {
+                backgroundColor: theme.colors.surface,
+                color: theme.colors.onSurface,
+                fontFamily: fontBody,
+              },
+            ]}
+          />
+
+          <TouchableOpacity
+            style={[
+              styles.bottomButton,
+              { backgroundColor: theme.colors.primary },
+            ]}
+            onPress={() => joinFoyer(foyerUID)}
+          >
+            <Text
+              style={{
+                color: theme.colors.onBackground,
+                fontFamily: fontButton,
+                fontSize: 14,
+              }}
+            >
+              Rejoindre
             </Text>
           </TouchableOpacity>
         </>
@@ -369,5 +461,6 @@ const styles = StyleSheet.create({
     width: "100%",
     padding: 10,
     borderRadius: 5,
+    marginBottom: 200,
   },
 });
