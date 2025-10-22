@@ -364,7 +364,7 @@ export default function Foyer() {
           </Text>
 
           <TextInput
-            placeholder="Nom du foyer"
+            placeholder="Code unique du foyer"
             placeholderTextColor="#888"
             value={foyerUID}
             onChangeText={setFoyerUID}
