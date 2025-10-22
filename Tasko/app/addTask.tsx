@@ -146,6 +146,7 @@ export default function AddTaskScreen() {
             display="default"
             onChange={onDateChange}
             is24Hour={true}
+            minimumDate={new Date()}
           />
         )}
 
